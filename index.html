@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100 Days — No Excuses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c0e;
+  --bg-panel:#14171b;
+  --bg-panel-2:#1b1f24;
+  --bg-raised:#20242a;
+  --border:#262b31;
+  --border-soft:#1d2126;
+  --text:#eae7e0;
+  --text-dim:#9aa0a6;
+  --text-faint:#5b6167;
+  --ember:#ff5a2b;
+  --ember-soft:#ff5a2b33;
+  --ok:#3ddc84;
+  --ok-soft:#3ddc8433;
+  --excused:#5b8def;
+  --excused-soft:#5b8def33;
+  --missed:#e6455d;
+  --missed-soft:#e6455d33;
+  --recovery:#f5b942;
+  --recovery-soft:#f5b94233;
+  --font-display:'Oswald',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font-body);}
+body{padding:0 0 60px 0;}
+::selection{background:var(--ember-soft);}
+a{color:var(--ember);}
+button{font-family:var(--font-body);cursor:pointer;}
+input,select,textarea{font-family:var(--font-body);}
+:focus-visible{outline:2px solid var(--ember);outline-offset:2px;}
+
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px;}
+
+/* ---------- HEADER ---------- */
+.topbar{border-bottom:1px solid var(--border);background:linear-gradient(180deg,#0d1012,#0a0c0e);}
+.topbar-inner{max-width:1000px;margin:0 auto;padding:22px 20px 18px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;}
+.brand{font-family:var(--font-display);text-transform:uppercase;letter-spacing:2px;font-size:13px;color:var(--text-faint);}
+.brand b{color:var(--ember);}
+.day-hero{display:flex;align-items:baseline;gap:10px;}
+.day-hero .num{font-family:var(--font-display);font-size:64px;line-height:1;font-weight:600;letter-spacing:-1px;}
+.day-hero .of{font-family:var(--font-display);font-size:22px;color:var(--text-faint);}
+.day-meta{font-family:var(--font-mono);font-size:13px;color:var(--text-dim);margin-top:4px;}
+.cycle-badge{display:inline-block;font-family:var(--font-mono);font-size:11px;color:var(--recovery);border:1px solid var(--recovery);padding:2px 8px;border-radius:2px;margin-left:8px;vertical-align:middle;}
+
+.stat-row{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;}
+.stat{text-align:right;}
+.stat .v{font-family:var(--font-display);font-size:22px;color:var(--text);}
+.stat .l{color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;font-size:10px;}
+.stat.fire .v{color:var(--ember);}
+
+/* ---------- TICK GRID (signature element) ---------- */
+.ledger{max-width:1000px;margin:22px auto 0;padding:0 20px;}
+.ledger-title{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-faint);margin-bottom:10px;display:flex;justify-content:space-between;}
+.ledger-legend{display:flex;gap:14px;font-size:10px;color:var(--text-faint);}
+.ledger-legend span{display:inline-flex;align-items:center;gap:4px;}
+.legend-dot{width:8px;height:8px;border-radius:1px;display:inline-block;}
+.tickgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;}
+.tick{
+  aspect-ratio:1;border-radius:2px;border:1px solid var(--border);
+  background:var(--bg-panel);position:relative;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:9px;color:var(--text-faint);
+  transition:transform .08s ease;
+}
+.tick:hover{transform:scale(1.12);z-index:2;}
+.tick.today{border:2px solid var(--ember);color:var(--ember);}
+.tick.future{opacity:.35;cursor:default;}
+.tick.future:hover{transform:none;}
+.tick.status-100{background:var(--ember);border-color:var(--ember);color:#1a0a03;}
+.tick.status-90{background:var(--ok);border-color:var(--ok);color:#04180d;}
+.tick.status-80{background:#2fae86;border-color:#2fae86;color:#04180d;}
+.tick.status-70{background:var(--recovery-soft);border-color:var(--recovery);color:var(--recovery);}
+.tick.status-40{background:var(--missed-soft);border-color:var(--missed);color:var(--missed);}
+.tick.status-recovery{background:repeating-linear-gradient(45deg,var(--recovery-soft),var(--recovery-soft) 3px,transparent 3px,transparent 6px);border-color:var(--recovery);color:var(--recovery);}
+.tick.status-empty{background:var(--bg-panel);}
+.row-label{grid-column:1/-1;font-family:var(--font-mono);font-size:9px;color:var(--text-faint);margin-top:2px;}
+
+/* ---------- TABS ---------- */
+.tabs{max-width:1000px;margin:26px auto 0;padding:0 20px;display:flex;gap:4px;border-bottom:1px solid var(--border);}
+.tab-btn{background:none;border:none;color:var(--text-faint);font-family:var(--font-display);text-transform:uppercase;letter-spacing:1px;font-size:14px;padding:12px 16px;border-bottom:2px solid transparent;}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--ember);}
+.tab-panel{display:none;max-width:1000px;margin:0 auto;padding:24px 20px 10px;}
+.tab-panel.active{display:block;}
+
+/* ---------- CARDS ---------- */
+.card{background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;padding:18px 20px;margin-bottom:16px;}
+.card h3{font-family:var(--font-display);text-transform:uppercase;letter-spacing:1px;font-size:15px;margin:0 0 12px;color:var(--text);display:flex;align-items:center;gap:8px;}
+.card h3 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.muted{color:var(--text-dim);font-size:13px;line-height:1.6;}
+.brief-line{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-soft);font-size:13.5px;line-height:1.5;}
+.brief-line:last-child{border-bottom:none;}
+.brief-line .ico{width:20px;flex-shrink:0;text-align:center;}
+.brief-line b{color:var(--text);}
+
+.btn{background:var(--ember);color:#1a0a03;border:none;padding:11px 20px;border-radius:4px;font-family:var(--font-display);text-transform:uppercase;letter-spacing:1px;font-size:14px;font-weight:600;}
+.btn:hover{filter:brightness(1.08);}
+.btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn.secondary:hover{border-color:var(--text-dim);}
+.btn.danger{background:transparent;color:var(--missed);border:1px solid var(--missed);}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* ---------- FORMS ---------- */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.field .hint{color:var(--text-faint);font-size:11px;margin-top:4px;}
+select,input[type=number],input[type=text],textarea{
+  width:100%;background:var(--bg-raised);border:1px solid var(--border);color:var(--text);
+  padding:9px 10px;border-radius:4px;font-size:14px;
+}
+textarea{resize:vertical;min-height:56px;}
+.status-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.status-btn{flex:1;min-width:80px;padding:9px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-raised);color:var(--text-dim);font-size:12px;text-align:center;font-family:var(--font-mono);}
+.status-btn.sel-done{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);}
+.status-btn.sel-excused{background:var(--excused-soft);border-color:var(--excused);color:var(--excused);}
+.status-btn.sel-missed{background:var(--missed-soft);border-color:var(--missed);color:var(--missed);}
+.status-btn.sel-na{opacity:.4;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr;}}
+.checkline{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);margin-top:6px;}
+.section-divider{border:none;border-top:1px solid var(--border);margin:18px 0;}
+.slider-row{display:flex;align-items:center;gap:10px;}
+.slider-row input[type=range]{flex:1;}
+.slider-val{font-family:var(--font-mono);width:24px;text-align:right;color:var(--ember);}
+
+/* ---------- MODAL ---------- */
+.modal-overlay{display:none;position:fixed;inset:0;background:#000000cc;z-index:50;align-items:flex-start;justify-content:center;overflow-y:auto;padding:30px 14px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;max-width:640px;width:100%;padding:24px;margin-bottom:40px;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.modal-head h2{font-family:var(--font-display);text-transform:uppercase;letter-spacing:1px;font-size:20px;margin:0;}
+.close-x{background:none;border:none;color:var(--text-dim);font-size:22px;line-height:1;}
+
+/* ---------- FEEDBACK PANEL ---------- */
+.feedback{border-left:3px solid var(--ember);padding:14px 16px;background:var(--bg-panel-2);border-radius:0 6px 6px 0;margin-bottom:14px;}
+.feedback .ftitle{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ember);margin-bottom:4px;}
+.feedback .fbody{font-size:13.5px;line-height:1.6;color:var(--text);margin-bottom:12px;}
+.score-badge{display:inline-block;font-family:var(--font-display);font-size:34px;color:var(--ember);}
+.score-band{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;}
+.streak-line{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);background:var(--bg-raised);padding:10px 12px;border-radius:4px;margin-top:8px;}
+
+/* ---------- DASHBOARD ---------- */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.bar-label{width:110px;font-size:12px;color:var(--text-dim);flex-shrink:0;}
+.bar-track{flex:1;height:10px;background:var(--bg-raised);border-radius:5px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--ember);}
+.bar-pct{width:40px;text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--text-dim);}
+.flag{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:13px;}
+.flag:last-child{border-bottom:none;}
+.flag .ico{color:var(--recovery);}
+
+/* ---------- HISTORY ---------- */
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:13px;cursor:pointer;}
+.hist-row:hover{background:var(--bg-panel-2);}
+.hist-day{font-family:var(--font-mono);color:var(--text-dim);width:70px;}
+.hist-score{font-family:var(--font-display);width:50px;text-align:right;}
+
+/* ---------- TOAST ---------- */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg-raised);border:1px solid var(--border);padding:10px 18px;border-radius:5px;font-size:13px;z-index:100;display:none;}
+.toast.show{display:block;}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-faint);font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand"><b>●</b> 100 DAYS — NO EXCUSES <span id="cycleBadgeWrap"></span></div>
+      <div class="day-hero"><span class="num" id="dayNum">1</span><span class="of">/ 100</span></div>
+      <div class="day-meta" id="dayMeta">—</div>
+    </div>
+    <div class="stat-row" id="statRow"></div>
+  </div>
+</div>
+
+<div class="ledger">
+  <div class="ledger-title">
+    <span>THE LEDGER</span>
+    <span class="ledger-legend">
+      <span><i class="legend-dot" style="background:var(--ember)"></i>Perfect</span>
+      <span><i class="legend-dot" style="background:var(--ok)"></i>Solid</span>
+      <span><i class="legend-dot" style="background:var(--recovery)"></i>Rough/Recovery</span>
+      <span><i class="legend-dot" style="background:var(--missed)"></i>Missed</span>
+    </span>
+  </div>
+  <div class="tickgrid" id="tickGrid"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="today">Today</button>
+  <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+  <button class="tab-btn" data-tab="history">History</button>
+  <button class="tab-btn" data-tab="settings">Settings</button>
+</div>
+
+<!-- TODAY -->
+<div class="tab-panel active" id="tab-today">
+  <div class="card">
+    <h3><span class="dot" style="background:var(--ember)"></span>Morning Brief</h3>
+    <div id="briefBox"></div>
+  </div>
+  <div class="card">
+    <h3><span class="dot" style="background:var(--excused)"></span>Evening Check-in</h3>
+    <p class="muted" id="checkinStatusMsg">Log today once it's done. Be honest — excused pauses and recovery mode are real options, not loopholes.</p>
+    <div class="btn-row">
+      <button class="btn" id="openCheckin">Log Today</button>
+      <button class="btn secondary" id="editCheckin" style="display:none;">Edit Today's Log</button>
+    </div>
+  </div>
+  <div id="feedbackHolder"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="tab-panel" id="tab-dashboard">
+  <div class="card">
+    <h3>This Week</h3>
+    <div id="weekBars"></div>
+  </div>
+  <div class="card">
+    <h3>Pattern Flags</h3>
+    <div id="flagsBox"><div class="empty-state">No patterns flagged yet.</div></div>
+  </div>
+  <div class="card" id="milestoneCard" style="display:none;">
+    <h3><span class="dot" style="background:var(--recovery)"></span>Monthly Review Due</h3>
+    <div id="milestoneBox"></div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="tab-panel" id="tab-history">
+  <div class="card">
+    <h3>Log History</h3>
+    <div id="historyBox"><div class="empty-state">Nothing logged yet.</div></div>
+  </div>
+  <div class="card">
+    <h3>Backup</h3>
+    <p class="muted">Your data lives in this browser only. Export regularly so a cleared cache never costs you the streak.</p>
+    <div class="btn-row">
+      <button class="btn secondary" id="exportBtn">Export JSON</button>
+      <button class="btn secondary" id="importBtn">Import JSON</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none;">
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="tab-panel" id="tab-settings">
+  <div class="card">
+    <h3>Journey Start Date</h3>
+    <div class="field">
+      <label>Day 1 date</label>
+      <input type="date" id="startDateInput">
+    </div>
+    <div class="field">
+      <label class="checkline"><input type="checkbox" id="interviewToggle"> Interview currently scheduled (Code Blocks 2 & 3 flex to interview prep; DSA Block 1 stays non-negotiable)</label>
+    </div>
+    <button class="btn secondary" id="saveSettings">Save</button>
+  </div>
+  <div class="card">
+    <h3>Day 100 & Beyond</h3>
+    <p class="muted">Available once you hit Day 100. <b>Continue</b> keeps this cycle's streaks running past 100. <b>Restart</b> archives this cycle and begins Day 1 again.</p>
+    <div class="btn-row">
+      <button class="btn secondary" id="continueBtn" disabled>Continue Past 100</button>
+      <button class="btn danger" id="restartBtn" disabled>Restart — New Cycle</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Reset Everything</h3>
+    <p class="muted">Wipes all cycles, all logs, all history. Cannot be undone.</p>
+    <button class="btn danger" id="wipeBtn">Erase All Data</button>
+  </div>
+</div>
+
+<!-- CHECK-IN MODAL -->
+<div class="modal-overlay" id="checkinModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalDayTitle">Check-in</h2>
+      <button class="close-x" id="closeModal">&times;</button>
+    </div>
+    <div class="field">
+      <label class="checkline"><input type="checkbox" id="recoveryToggle"> Invoke Recovery Mode today (not sick, nothing's closed, but running on empty)</label>
+      <div class="hint">If checked: 1 DSA problem, diya bati, protein as-best-possible, a 20-min walk/home workout, and skin routine count as your minimums. Everything else is marked n/a for today, penalty-free.</div>
+    </div>
+    <hr class="section-divider">
+    <div id="dynamicFormArea"></div>
+    <hr class="section-divider">
+    <div class="grid3">
+      <div class="field"><label>Energy (1-10)</label><div class="slider-row"><input type="range" min="1" max="10" id="energySlider" value="6"><span class="slider-val" id="energyVal">6</span></div></div>
+      <div class="field"><label>Motivation (1-10)</label><div class="slider-row"><input type="range" min="1" max="10" id="motivationSlider" value="6"><span class="slider-val" id="motivationVal">6</span></div></div>
+      <div class="field"><label>Discipline (1-10)</label><div class="slider-row"><input type="range" min="1" max="10" id="disciplineSlider" value="6"><span class="slider-val" id="disciplineVal">6</span></div></div>
+    </div>
+    <div class="field"><label>🏆 Biggest win today</label><textarea id="winInput"></textarea></div>
+    <div class="field"><label>⚠️ Tomorrow's biggest trap</label><textarea id="trapInput"></textarea></div>
+    <div class="field"><label>🛡️ Plan to beat it</label><textarea id="planInput"></textarea></div>
+    <div class="field">
+      <label class="checkline"><input type="checkbox" id="bingeToggle"> Log a slip / binge</label>
+      <div id="bingeFields" style="display:none;margin-top:10px;">
+        <div class="grid2">
+          <div class="field"><label>Time</label><input type="text" id="bingeTime" placeholder="e.g. 11:30 PM"></div>
+          <div class="field"><label>Trigger</label><input type="text" id="bingeTrigger" placeholder="e.g. Netflix after badminton"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Emotion</label><input type="text" id="bingeEmotion"></div>
+          <div class="field"><label>Food eaten</label><input type="text" id="bingeFood"></div>
+        </div>
+        <div class="field"><label>Better alternative next time</label><input type="text" id="bingeAlt"></div>
+      </div>
+    </div>
+    <div class="field"><label>Notes (stress, travel, injury, festival, etc.)</label><textarea id="notesInput"></textarea></div>
+    <div class="btn-row"><button class="btn" id="submitCheckin">Save Check-in</button><button class="btn secondary" id="cancelCheckin">Cancel</button></div>
+  </div>
+</div>
+
+<!-- DAY DETAIL MODAL (read from ledger) -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-head"><h2 id="detailTitle">Day</h2><button class="close-x" id="closeDetail">&times;</button></div>
+    <div id="detailBody"></div>
+    <div class="btn-row" style="margin-top:14px;"><button class="btn secondary" id="closeDetailBtn">Close</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   SCHEDULE DATA — derived from the source plan tables
+   ============================================================ */
+const GYM = {1:"Chest & Shoulder — bench press, incline dumbbell press, cable chest fly, shoulder press, front raise, lateral raise, face pull cable",
+2:"Back & Arms — barbell bent-over row, lat pulldown, back extension, incline dumbbell curl, hammer curl, preacher curl, concentration curl, skull crusher, cable triceps pushdown, dumbbell kickback",
+3:"Legs & Core — Bulgarian split squats, barbell squats, leg curl, leg extension, calf raise, cable crunch, cable woodchopper",
+4:"Shoulder & Chest (shoulder exercises first)",
+5:"Arms & Back (arm exercises first)",
+6:"Rest / active recovery from gym",
+0:"Rest from gym & badminton"};
+const GYM_ISREST = {0:true,6:true,1:false,2:false,3:false,4:false,5:false};
+const BADMINTON = {1:true,2:true,3:true,4:false,5:true,6:true,0:false};
+const TEMPLE = {5:true,6:true};
+const CHORES_EXTRA = {4:"Laundry",6:"Bathroom clean",0:"Laundry + bedsheet + doormats"};
+const BODYCARE = {
+1:{face:"Cleanser → Salicylic → Moisturizer → Lip balm",body:"De-tan pack → Lotion → Almond oil",hair:"Hair oil + Scalp ointment"},
+2:{face:"Cleanser → Retinol → Moisturizer → Lip balm",body:"Glycolic acid → Lotion",hair:"Hair oil if missed Mon; otherwise rest"},
+3:{face:"Cleanser → Moisturizer",body:"Shower + gentle scrub → Lotion",hair:"Wash day: Pre-shampoo → Shampoo → Conditioner"},
+4:{face:"Cleanser → Retinol → Moisturizer",body:"De-tan pack → Lotion",hair:"Scalp ointment"},
+5:{face:"Cleanser → Salicylic → Moisturizer",body:"Glycolic acid → Lotion",hair:"Hair oil + Scalp ointment"},
+6:{face:"Cleanser → Retinol → Moisturizer",body:"Moisturize only",hair:"Hair mask (wash day if applicable)"},
+0:{face:"Face pack → Moisturizer → Lip balm",body:"Spa + Lotion + Almond oil",hair:"Wash day: Shampoo → Conditioner → Serum"}};
+const SD_CHAPTER = {1:"Done: Ch1-3 (Scale, Estimation, Framework)",2:"Ch4: Rate Limiter",3:"Ch5: Consistent Hashing",4:"Ch6: Key-Value Store",5:"Ch7: Unique ID Generator",6:"Ch8: URL Shortener",7:"Ch9: Web Crawler",8:"Ch10: Notification System (tie to ASB)",9:"Ch11: News Feed System",10:"Ch12-13: Chat System, Search Autocomplete (lighter)",11:"Ch14: Video Streaming (skim) + SD/LLD revision begins",12:"Full mock mode: 1 HLD mock this week",13:"Full mock mode: 1 HLD mock this week"};
+const LLD_PROBLEM = {2:"Parking Lot System",3:"Elevator System",4:"Library Management System",6:"Splitwise / Expense Sharing",8:"Tic-Tac-Toe / Chess",10:"Rate Limiter (LLD/in-process)",12:"Full mock mode: 1 LLD mock this week",13:"Full mock mode: 1 LLD mock this week"};
+const CORE_TOPIC = {1:"C# deep-dive: delegates, generics, LINQ basics, GC/boxing, SOLID",2:"Design Patterns I: Singleton, Factory, Builder, Adapter, Decorator",3:"Design Patterns II (Strategy, Observer, CoR) + Async/await deep dive",4:"(SD/LLD only this week)",5:"Azure Core: App Service, Functions, Storage, Key Vault; Microservices patterns",6:"Azure Service Bus: queues vs topics, dead-lettering, sessions; Kafka conceptual",7:"(SD only this week)",8:"SQL + LINQ mastery: indexing, query optimization, joins, window functions",9:"CI/CD stages, blue-green/canary; Kubernetes concepts only",10:"React refresh: hooks, component design, state management",11:"Revision + full mock mode",12:"Revision + full mock mode",13:"Revision + full mock mode"};
+const DSA_DAY1_REVIEW = ["Contains Duplicate","Valid Anagram","Two Sum","Group Anagrams","Top K Frequent Elements","Encode and Decode Strings","Product of Array Except Self","Valid Sudoku","Longest Consecutive Sequence","Valid Palindrome","Two Sum II","3Sum","Container With Most Water","Trapping Rain Water"];
+const DSA_REMAINING = [
+"Best Time to Buy and Sell Stock","Longest Substring Without Repeating Characters","Longest Repeating Character Replacement","Permutation in String","Minimum Window Substring","Sliding Window Maximum",
+"Valid Parentheses","Min Stack","Evaluate Reverse Polish Notation","Generate Parentheses","Daily Temperatures","Car Fleet",
+"Binary Search","Search a 2D Matrix","Koko Eating Bananas","Find Minimum in Rotated Sorted Array","Search in Rotated Sorted Array","Time Based Key-Value Store","Median of Two Sorted Arrays",
+"Reverse Linked List","Merge Two Sorted Lists","Reorder List","Remove Nth Node From End of List","Copy List with Random Pointer","Add Two Numbers","Linked List Cycle","Find the Duplicate Number","LRU Cache","Merge k Sorted Lists","Reverse Nodes in k-Group",
+"Invert Binary Tree","Maximum Depth of Binary Tree","Diameter of Binary Tree","Balanced Binary Tree","Same Tree","Subtree of Another Tree","Lowest Common Ancestor of a BST","Binary Tree Level Order Traversal","Binary Tree Right Side View","Count Good Nodes in Binary Tree","Validate Binary Search Tree","Kth Smallest Element in a BST","Construct Binary Tree from Preorder and Inorder Traversal","Binary Tree Maximum Path Sum","Serialize and Deserialize Binary Tree",
+"Implement Trie (Prefix Tree)","Design Add and Search Words Data Structure","Word Search II",
+"Kth Largest Element in a Stream","Last Stone Weight","K Closest Points to Origin","Kth Largest Element in an Array","Task Scheduler","Design Twitter","Find Median from Data Stream",
+"Subsets","Combination Sum","Permutations","Subsets II","Combination Sum II","Word Search","Palindrome Partitioning","Letter Combinations of a Phone Number","N-Queens","Combination Sum III",
+"Number of Islands","Max Area of Island","Clone Graph","Islands and Treasure (Walls and Gates)","Rotting Oranges","Pacific Atlantic Water Flow","Surrounded Regions","Course Schedule","Course Schedule II","Redundant Connection","Number of Connected Components in an Undirected Graph","Graph Valid Tree","Word Ladder",
+"Reconstruct Itinerary","Min Cost to Connect All Points","Network Delay Time","Swim in Rising Water","Alien Dictionary","Cheapest Flights Within K Stops",
+"Climbing Stairs","Min Cost Climbing Stairs","House Robber","House Robber II","Longest Palindromic Substring","Palindromic Substrings","Decode Ways","Coin Change","Maximum Product Subarray","Word Break","Longest Increasing Subsequence","Partition Equal Subset Sum",
+"Unique Paths","Longest Common Subsequence","Best Time to Buy and Sell Stock with Cooldown","Coin Change II","Target Sum","Interleaving String","Longest Increasing Path in a Matrix","Distinct Subsequences","Edit Distance","Burst Balloons","Regular Expression Matching",
+"Maximum Subarray","Jump Game","Jump Game II","Gas Station","Hand of Straights","Merge Triplets to Form Target Triplet","Partition Labels","Valid Parenthesis String",
+"Insert Interval","Merge Intervals","Non-overlapping Intervals","Meeting Rooms","Meeting Rooms II","Minimum Interval to Include Each Query",
+"Rotate Image","Spiral Matrix","Set Matrix Zeroes","Happy Number","Plus One","Pow(x, n)","Multiply Strings","Detect Squares",
+"Single Number","Number of 1 Bits","Counting Bits","Reverse Bits","Missing Number","Sum of Two Integers","Reverse Integer"];
+
+function weekNumber(day){ return Math.ceil(day/7); }
+
+function getDSA(day){
+  if(day===1) return {mode:"review",text:"Cold revision (no notes) — Arrays & Hashing + Two Pointers: "+DSA_DAY1_REVIEW.join(", ")};
+  if(day<=48){
+    const idx=(day-2)*3;
+    const probs=DSA_REMAINING.slice(idx,idx+3);
+    if(probs.length===0) return {mode:"buffer",text:"List exhausted early — pull from weakest category so far."};
+    return {mode:"new",text:probs.join(", ")};
+  }
+  if(day<=56) return {mode:"buffer",text:"Buffer week — close out Greedy / Intervals / Math & Geometry / Bit Manipulation, prioritizing whichever is weakest."};
+  if(day<=76) return {mode:"revision",text:"Spaced revision, no new categories — priority order Graphs → DP → Backtracking → rest. 2 timed mock DSA rounds this week."};
+  if(day<=90) return {mode:"mixed",text:(day>=86?"Final week — light only, 1 problem/day max.":"Random mixed drills, no category hints, full verbal walkthrough.")};
+  return {mode:"bonus",text:"Bonus interview-sprint day — keep the mock cadence: 1 DSA mock this week, plus job-search follow-ups."};
+}
+
+function getBlock2(day, weekday, interviewActive){
+  if(interviewActive) return {label:"Interview Prep (low-priority topic, flexed for interview)", detail:"Company research + interview-specific prep"};
+  const wk = weekNumber(day);
+  if(day>90) return {label:"Bonus Sprint", detail:"1 SD mock / 1 LLD mock / 1 behavioral mock this week (rotate)"};
+  if([1,3,5].includes(weekday)){
+    const sd = SD_CHAPTER[wk] || "Revision / mock mode";
+    const lld = LLD_PROBLEM[wk];
+    return {label:"System Design", detail: sd + (lld? " · LLD this week: "+lld : "")};
+  } else if([2,4,6].includes(weekday)){
+    return {label:"Tech Topic / Design Pattern", detail: CORE_TOPIC[wk] || "Revision"};
+  }
+  return null;
+}
+
+/* ============================================================
+   STATE / STORAGE
+   ============================================================ */
+const STORE_KEY = "tracker100_v1";
+function todayISO(d){ d=d||new Date(); return d.toISOString().slice(0,10); }
+function defaultState(){
+  return {
+    config:{ startDate: todayISO(), cycle:1, interviewActive:false },
+    cycles:{ 1: { logs:{} } },
+    archivedCycles:[]
+  };
+}
+let state = load();
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    if(!parsed.config || !parsed.cycles) return defaultState();
+    return parsed;
+  }catch(e){ return defaultState(); }
+}
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+function currentCycle(){ return state.cycles[state.config.cycle]; }
+function dayForDate(dateISO){
+  const start = new Date(state.config.startDate+"T00:00:00");
+  const d = new Date(dateISO+"T00:00:00");
+  return Math.floor((d-start)/86400000)+1;
+}
+function dateForDay(n){
+  const start = new Date(state.config.startDate+"T00:00:00");
+  const d = new Date(start.getTime() + (n-1)*86400000);
+  return d;
+}
+function currentDay(){
+  const n = dayForDate(todayISO());
+  return Math.max(1,n);
+}
+
+/* ============================================================
+   SCHEDULE FOR A GIVEN DAY
+   ============================================================ */
+function scheduleFor(day){
+  const d = dateForDay(day);
+  const weekday = d.getDay();
+  const wk = weekNumber(day);
+  return {
+    day, date:d, weekday, week:wk,
+    gymIsRest: GYM_ISREST[weekday],
+    gymText: GYM[weekday],
+    badminton: BADMINTON[weekday],
+    temple: !!TEMPLE[weekday],
+    choresExtra: CHORES_EXTRA[weekday]||null,
+    bodycare: BODYCARE[weekday],
+    dsa: getDSA(day),
+    block2: getBlock2(day, weekday, state.config.interviewActive),
+    isSunday: weekday===0,
+    isPastPlanRange: day>100
+  };
+}
+const WEEKDAY_NAMES=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+function fmtDate(d){ return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+
+/* ============================================================
+   NON-NEGOTIABLE ITEM LIST FOR A DAY (for consistency % calc)
+   ============================================================ */
+function scheduledItems(sc){
+  const items = ["dsa","diyabati","dietLogging","chores","bodycare"];
+  if(!sc.gymIsRest) items.push("gym");
+  if(sc.badminton) items.push("badminton");
+  if(sc.temple) items.push("temple");
+  return items;
+}
+
+/* ============================================================
+   COMPUTE ENGINE — streaks, consistency, score, no-zero-day
+   ============================================================ */
+function allLogsSorted(){
+  const logs = currentCycle().logs;
+  return Object.keys(logs).map(k=>parseInt(k,10)).sort((a,b)=>a-b).map(k=>logs[k]);
+}
+
+function computeConsistency(log, sc){
+  if(!log) return null;
+  if(log.recoveryMode){
+    // 5 minimums count as done; everything else n/a
+    return 100;
+  }
+  const items = scheduledItems(sc);
+  let num=0, den=0;
+  items.forEach(key=>{
+    const st = log.items[key];
+    if(!st || st==="na" || st==="excused") return; // excluded from both
+    den++;
+    if(st==="done") num++;
+  });
+  if(den===0) return 100;
+  return Math.round((num/den)*100);
+}
+
+function scoreBand(pct){
+  if(pct>=100) return {score:100,label:"Perfect"};
+  if(pct>=90) return {score:90,label:"Excellent"};
+  if(pct>=80) return {score:80,label:"Good"};
+  if(pct>=70) return {score:70,label:"Acceptable"};
+  return {score:Math.max(40,Math.round(pct/10)*10),label:"Needs correction"};
+}
+
+function computeStreaks(){
+  const logs = currentCycle().logs;
+  const maxDay = Math.max(0, ...Object.keys(logs).map(k=>parseInt(k,10)));
+  let streaks = {gym:0,badminton:0,diet:0,code:0,diyabati:0};
+  let noZero=0, longestNoZero=0, totalZero=0;
+  for(let d=1; d<=maxDay; d++){
+    const log = logs[d];
+    if(!log) continue;
+    const sc = scheduleFor(d);
+    const upd=(key,scheduledFlag)=>{
+      if(!scheduledFlag) return; // not scheduled today, doesn't affect streak
+      const st = log.recoveryMode ? (["dsa","diyabati"].includes(key) ? "done" : "na") : log.items[key];
+      if(st==="done") streaks[key]++;
+      else if(st==="excused"||st==="na"||st===undefined) { /* freeze */ }
+      else if(st==="missed") streaks[key]=0;
+    };
+    upd("gym", !sc.gymIsRest);
+    upd("badminton", sc.badminton);
+    upd("code", true); // dsa always scheduled
+    // remap code -> dsa key
+    const dsaSt = log.recoveryMode ? "done" : (log.items.dsa||undefined);
+    if(dsaSt==="done") {} else if(dsaSt==="missed"){ streaks.code=0; }
+    upd("diyabati", true);
+    const dietSt = log.recoveryMode ? "done" : (log.items.dietLogging||undefined);
+    if(dietSt==="missed") streaks.diet = streaks.diet; // handled via upd pattern below
+
+    // diet streak (separate since key name differs)
+    if(dietSt==="done") streaks.diet++; else if(dietSt==="missed") streaks.diet=0;
+
+    // zero day check
+    const gymSt = log.recoveryMode ? "done" : log.items.gym;
+    const isZero = (dsaSt!=="done") && ((log.recoveryMode?"done":log.items.diyabati)!=="done") && (dietSt!=="done") && (sc.gymIsRest || gymSt!=="done");
+    if(isZero){ totalZero++; noZero=0; } else { noZero++; longestNoZero=Math.max(longestNoZero,noZero); }
+  }
+  longestNoZero=Math.max(longestNoZero,noZero);
+  return {streaks, noZero, longestNoZero, totalZero};
+}
+
+function rollingWindowLogs(days){
+  const logs = currentCycle().logs;
+  const cur = currentDay();
+  const out=[];
+  for(let d=Math.max(1,cur-days+1); d<=cur; d++){ if(logs[d]) out.push({day:d,log:logs[d]}); }
+  return out;
+}
+
+function patternFlags(){
+  const flags=[];
+  const win30 = rollingWindowLogs(30);
+  // excused pause counts per domain
+  const excusedCounts={};
+  win30.forEach(({log})=>{
+    Object.keys(log.items||{}).forEach(k=>{
+      if(log.items[k]==="excused") excusedCounts[k]=(excusedCounts[k]||0)+1;
+    });
+  });
+  Object.keys(excusedCounts).forEach(k=>{
+    if(excusedCounts[k]>3) flags.push(`${k} has ${excusedCounts[k]} excused pauses in the last 30 days — is the plan the problem, or something else?`);
+  });
+  const recoveryCount = win30.filter(({log})=>log.recoveryMode).length;
+  if(recoveryCount>4) flags.push(`Recovery Mode used ${recoveryCount} times in the last 30 days — check if it's quietly becoming a weekly habit.`);
+  const bingeCount = win30.filter(({log})=>log.binge).length;
+  if(bingeCount>=3) flags.push(`${bingeCount} logged slips/binges in the last 30 days — this is a recurring pattern, not a one-off.`);
+  return flags;
+}
+
+/* ============================================================
+   RENDER — HEADER
+   ============================================================ */
+function render(){
+  const cur = currentDay();
+  const sc = scheduleFor(cur);
+  document.getElementById("dayNum").textContent = cur;
+  document.getElementById("dayMeta").textContent = `${WEEKDAY_NAMES[sc.weekday]}, ${fmtDate(sc.date)} · Week ${sc.week}`;
+  document.getElementById("cycleBadgeWrap").innerHTML = state.config.cycle>1 ? `<span class="cycle-badge">CYCLE ${state.config.cycle}</span>` : "";
+
+  const {streaks, noZero} = computeStreaks();
+  const logs = currentCycle().logs;
+  const consArr = Object.keys(logs).map(k=>computeConsistency(logs[k], scheduleFor(parseInt(k,10))));
+  const avgCons = consArr.length? Math.round(consArr.reduce((a,b)=>a+b,0)/consArr.length) : 0;
+
+  document.getElementById("statRow").innerHTML = `
+    <div class="stat fire"><div class="v">${streaks.gym}</div><div class="l">Gym</div></div>
+    <div class="stat fire"><div class="v">${streaks.code}</div><div class="l">Code</div></div>
+    <div class="stat fire"><div class="v">${streaks.diyabati}</div><div class="l">Diya</div></div>
+    <div class="stat fire"><div class="v">${noZero}</div><div class="l">No-Zero</div></div>
+    <div class="stat"><div class="v">${avgCons}%</div><div class="l">Consistency</div></div>
+  `;
+
+  renderTickGrid();
+  renderToday(sc);
+  renderDashboard();
+  renderHistory();
+  renderSettings();
+}
+
+function statusOfDay(d){
+  const log = currentCycle().logs[d];
+  if(!log) return null;
+  if(log.recoveryMode) return "recovery";
+  const sc = scheduleFor(d);
+  const pct = computeConsistency(log, sc);
+  if(pct>=100) return "100";
+  if(pct>=90) return "90";
+  if(pct>=80) return "80";
+  if(pct>=70) return "70";
+  return "40";
+}
+
+function renderTickGrid(){
+  const cur = currentDay();
+  const totalCells = Math.max(100, Math.ceil(cur/10)*10);
+  const grid = document.getElementById("tickGrid");
+  grid.innerHTML="";
+  for(let i=1;i<=totalCells;i++){
+    const cell=document.createElement("div");
+    let cls="tick";
+    if(i>cur) cls+=" future status-empty";
+    else{
+      const st = statusOfDay(i);
+      cls += st ? " status-"+st : " status-empty";
+    }
+    if(i===cur) cls+=" today";
+    cell.className=cls;
+    cell.textContent=i;
+    cell.title="Day "+i;
+    cell.addEventListener("click",()=>{ if(i<=cur) openDetail(i); });
+    grid.appendChild(cell);
+  }
+}
+
+/* ============================================================
+   TODAY TAB — BRIEF + CHECK-IN TRIGGER
+   ============================================================ */
+function renderToday(sc){
+  const box = document.getElementById("briefBox");
+  const badmintonLine = sc.badminton ? "10:00–11:00 PM" : "Rest (no badminton tonight)";
+  const templeLine = sc.temple ? "Yes — before diya bati" : "Not scheduled today";
+  const b2 = sc.block2;
+  box.innerHTML = `
+    <div class="brief-line"><span class="ico">🏋️</span><div>${sc.gymIsRest? '<b>Rest day</b> — '+sc.gymText : '<b>Gym:</b> '+sc.gymText}</div></div>
+    <div class="brief-line"><span class="ico">🏸</span><div><b>Badminton:</b> ${badmintonLine}</div></div>
+    <div class="brief-line"><span class="ico">🍽️</span><div><b>Diet:</b> 1500 kcal · 120g protein · no sugar/packet/maida · water 3L (small habit)</div></div>
+    <div class="brief-line"><span class="ico">💻</span><div><b>Block 1 (DSA):</b> ${sc.dsa.text}</div></div>
+    ${b2? `<div class="brief-line"><span class="ico">📘</span><div><b>Block 2 (${b2.label}):</b> ${b2.detail}</div></div>` : ''}
+    ${sc.isSunday? `<div class="brief-line"><span class="ico">📇</span><div><b>Block 3:</b> ${state.config.interviewActive? 'Interview prep (low priority topic)':'Job search ops — resume, outreach, mock review'}</div></div>` : ''}
+    <div class="brief-line"><span class="ico">🙏</span><div><b>Diya bati:</b> daily, non-negotiable. ${templeLine!=='Not scheduled today' ? '<b>Temple:</b> '+templeLine : ''}</div></div>
+    <div class="brief-line"><span class="ico">🧹</span><div><b>Chores:</b> Dusting, mopping, kitchen slab, utensils${sc.choresExtra? ' + '+sc.choresExtra : ''}</div></div>
+    <div class="brief-line"><span class="ico">🧴</span><div><b>Body care:</b> Face → ${sc.bodycare.face} | Body → ${sc.bodycare.body} | Hair → ${sc.bodycare.hair}</div></div>
+    ${state.config.interviewActive? `<div class="brief-line"><span class="ico">🎯</span><div><b>Interview flex active</b> — Blocks 2 & 3 are low priority this stretch. DSA stays non-negotiable.</div></div>` : ''}
+  `;
+  const cur = currentDay();
+  const hasLog = !!currentCycle().logs[cur];
+  document.getElementById("openCheckin").style.display = hasLog? "none":"inline-block";
+  document.getElementById("editCheckin").style.display = hasLog? "inline-block":"none";
+  document.getElementById("checkinStatusMsg").textContent = hasLog? "Today is logged. Edit it below if something changed." : "Log today once it's done. Be honest — excused pauses and recovery mode are real options, not loopholes.";
+
+  const fbHolder = document.getElementById("feedbackHolder");
+  fbHolder.innerHTML="";
+  if(hasLog) fbHolder.appendChild(buildFeedback(cur, currentCycle().logs[cur]));
+
+  // day-100 handling
+  const c100done = cur>=100;
+  document.getElementById("continueBtn").disabled = !c100done;
+  document.getElementById("restartBtn").disabled = !c100done;
+}
+
+/* ============================================================
+   CHECK-IN MODAL — build dynamic form based on today's schedule
+   ============================================================ */
+let editingDay = null;
+function statusButtonsHTML(key, options, current){
+  return `<div class="status-btns" data-key="${key}">` + options.map(o=>{
+    const cls = current===o.val ? " sel-"+o.val : "";
+    return `<button type="button" class="status-btn${cls}" data-val="${o.val}">${o.label}</button>`;
+  }).join("") + `</div>`;
+}
+function openCheckinModal(day){
+  editingDay = day;
+  const sc = scheduleFor(day);
+  const existing = currentCycle().logs[day] || {items:{}};
+  document.getElementById("modalDayTitle").textContent = `Check-in — Day ${day}`;
+  document.getElementById("recoveryToggle").checked = !!existing.recoveryMode;
+  const area = document.getElementById("dynamicFormArea");
+
+  let html = "";
+  if(!sc.gymIsRest){
+    html += `<div class="field"><label>Gym — ${sc.gymText}</label>${statusButtonsHTML("gym",[{val:"done",label:"Done"},{val:"home",label:"Home workout"},{val:"excused",label:"Excused"},{val:"missed",label:"Missed"}], existing.items.gym==="home"?"home":existing.items.gym)}</div>`;
+  }
+  if(sc.badminton){
+    html += `<div class="field"><label>Badminton (10–11 PM)</label>${statusButtonsHTML("badminton",[{val:"done",label:"Done"},{val:"steps",label:"10k-step fallback"},{val:"excused",label:"Excused"},{val:"missed",label:"Missed"}], existing.items.badminton)}</div>`;
+  }
+  html += `<div class="field"><label>Steps (Sunday bonus / fallback days)</label><input type="number" id="f_steps" value="${existing.steps||''}"></div>`;
+  html += `<div class="grid2">
+    <div class="field"><label>Calories</label><input type="number" id="f_cal" value="${existing.calories||''}"></div>
+    <div class="field"><label>Protein (g)</label><input type="number" id="f_protein" value="${existing.protein||''}"></div>
+  </div>`;
+  html += `<div class="grid3">
+    <div class="field checkline"><input type="checkbox" id="f_sugar" ${existing.sugarFree?'checked':''}><label style="margin:0;">No sugar</label></div>
+    <div class="field checkline"><input type="checkbox" id="f_packet" ${existing.packetFree?'checked':''}><label style="margin:0;">No packet food</label></div>
+    <div class="field checkline"><input type="checkbox" id="f_maida" ${existing.maidaFree?'checked':''}><label style="margin:0;">No maida</label></div>
+  </div>`;
+  html += `<div class="field"><label>Diet logging</label>${statusButtonsHTML("dietLogging",[{val:"done",label:"Logged"},{val:"missed",label:"Not logged"}], existing.items.dietLogging)}</div>`;
+  html += `<div class="grid2">
+    <div class="field"><label>Water (L) — small habit</label><input type="number" step="0.1" id="f_water" value="${existing.water||''}"></div>
+    <div class="field"><label>Sleep (hrs)</label><input type="number" step="0.1" id="f_sleep" value="${existing.sleep||''}"></div>
+  </div>`;
+  html += `<hr class="section-divider">`;
+  html += `<div class="field"><label>DSA — ${sc.dsa.text}</label>${statusButtonsHTML("dsa",[{val:"done",label:"Done"},{val:"missed",label:"Missed"}], existing.items.dsa)}</div>`;
+  html += `<div class="grid3">
+    <div class="field"><label>Problems solved</label><input type="number" id="f_dsacount" value="${existing.dsaCount||''}"></div>
+    <div class="field"><label>Solved solo?</label><select id="f_dsasolo"><option value="">—</option><option value="y" ${existing.dsaSolo==='y'?'selected':''}>Yes</option><option value="n" ${existing.dsaSolo==='n'?'selected':''}>No</option></select></div>
+    <div class="field"><label>Confidence (1-5)</label><input type="number" min="1" max="5" id="f_dsaconf" value="${existing.dsaConf||''}"></div>
+  </div>`;
+  if(sc.block2){
+    html += `<div class="field"><label>Block 2 — ${sc.block2.label}: ${sc.block2.detail}</label>${statusButtonsHTML("block2",[{val:"done",label:"Done"},{val:"missed",label:"Missed/skip"}], existing.items.block2)}</div>`;
+  }
+  if(sc.isSunday){
+    html += `<div class="field"><label>Block 3 — Job search ops</label>${statusButtonsHTML("block3",[{val:"done",label:"Done"},{val:"missed",label:"Missed/skip"}], existing.items.block3)}</div>`;
+  }
+  html += `<hr class="section-divider">`;
+  html += `<div class="field"><label>Diya bati (no excused-pause status)</label>${statusButtonsHTML("diyabati",[{val:"done",label:"Done"},{val:"missed",label:"Missed"}], existing.items.diyabati)}</div>`;
+  if(sc.temple){
+    html += `<div class="field"><label>Temple visit</label>${statusButtonsHTML("temple",[{val:"done",label:"Done"},{val:"excused",label:"Excused"},{val:"missed",label:"Missed"}], existing.items.temple)}</div>`;
+  }
+  html += `<div class="field"><label>Chores — daily${sc.choresExtra? ' + '+sc.choresExtra:''}</label>${statusButtonsHTML("chores",[{val:"done",label:"Done"},{val:"excused",label:"Excused"},{val:"missed",label:"Missed"}], existing.items.chores)}</div>`;
+  html += `<div class="field"><label>Body care</label>${statusButtonsHTML("bodycare",[{val:"done",label:"Done"},{val:"excused",label:"Excused"},{val:"missed",label:"Missed"}], existing.items.bodycare)}</div>`;
+  html += `<div class="field"><label>Post-meal walks (small habit, count 0-3)</label><input type="number" min="0" max="3" id="f_walks" value="${existing.walks||''}"></div>`;
+
+  area.innerHTML = html;
+  area.querySelectorAll(".status-btns").forEach(group=>{
+    group.querySelectorAll(".status-btn").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        group.querySelectorAll(".status-btn").forEach(b=>b.className="status-btn");
+        btn.className="status-btn sel-"+btn.dataset.val;
+        group.dataset.selected = btn.dataset.val;
+      });
+    });
+    if(group.dataset.key && existing.items[group.dataset.key]!==undefined){
+      group.dataset.selected = existing.items[group.dataset.key];
+    }
+  });
+
+  document.getElementById("energySlider").value = existing.energy||6;
+  document.getElementById("motivationSlider").value = existing.motivation||6;
+  document.getElementById("disciplineSlider").value = existing.discipline||6;
+  document.getElementById("energyVal").textContent = existing.energy||6;
+  document.getElementById("motivationVal").textContent = existing.motivation||6;
+  document.getElementById("disciplineVal").textContent = existing.discipline||6;
+  document.getElementById("winInput").value = existing.win||"";
+  document.getElementById("trapInput").value = existing.trap||"";
+  document.getElementById("planInput").value = existing.plan||"";
+  document.getElementById("notesInput").value = existing.notes||"";
+  document.getElementById("bingeToggle").checked = !!existing.binge;
+  document.getElementById("bingeFields").style.display = existing.binge? "block":"none";
+  if(existing.binge){
+    document.getElementById("bingeTime").value = existing.binge.time||"";
+    document.getElementById("bingeTrigger").value = existing.binge.trigger||"";
+    document.getElementById("bingeEmotion").value = existing.binge.emotion||"";
+    document.getElementById("bingeFood").value = existing.binge.food||"";
+    document.getElementById("bingeAlt").value = existing.binge.alt||"";
+  }
+
+  document.getElementById("checkinModal").classList.add("open");
+}
+
+function collectFormStatuses(){
+  const out={};
+  document.querySelectorAll("#dynamicFormArea .status-btns").forEach(g=>{
+    if(g.dataset.selected) out[g.dataset.key]=g.dataset.selected;
+  });
+  return out;
+}
+
+function saveCheckin(){
+  const day = editingDay;
+  const sc = scheduleFor(day);
+  const recoveryMode = document.getElementById("recoveryToggle").checked;
+  const statuses = collectFormStatuses();
+  // normalize gym "home" and badminton "steps" fallback -> counts as done
+  if(statuses.gym==="home") statuses.gym="done";
+  if(statuses.badminton==="steps") statuses.badminton="done";
+
+  const log = {
+    recoveryMode,
+    items: statuses,
+    steps: parseFloat(document.getElementById("f_steps").value)||0,
+    calories: parseFloat(document.getElementById("f_cal").value)||0,
+    protein: parseFloat(document.getElementById("f_protein").value)||0,
+    sugarFree: document.getElementById("f_sugar").checked,
+    packetFree: document.getElementById("f_packet").checked,
+    maidaFree: document.getElementById("f_maida").checked,
+    water: parseFloat(document.getElementById("f_water").value)||0,
+    sleep: parseFloat(document.getElementById("f_sleep").value)||0,
+    dsaCount: parseFloat(document.getElementById("f_dsacount").value)||0,
+    dsaSolo: document.getElementById("f_dsasolo").value,
+    dsaConf: parseFloat(document.getElementById("f_dsaconf").value)||0,
+    walks: parseFloat(document.getElementById("f_walks").value)||0,
+    energy: parseInt(document.getElementById("energySlider").value,10),
+    motivation: parseInt(document.getElementById("motivationSlider").value,10),
+    discipline: parseInt(document.getElementById("disciplineSlider").value,10),
+    win: document.getElementById("winInput").value,
+    trap: document.getElementById("trapInput").value,
+    plan: document.getElementById("planInput").value,
+    notes: document.getElementById("notesInput").value,
+    binge: document.getElementById("bingeToggle").checked ? {
+      time: document.getElementById("bingeTime").value,
+      trigger: document.getElementById("bingeTrigger").value,
+      emotion: document.getElementById("bingeEmotion").value,
+      food: document.getElementById("bingeFood").value,
+      alt: document.getElementById("bingeAlt").value
+    } : null
+  };
+  currentCycle().logs[day] = log;
+  save();
+  document.getElementById("checkinModal").classList.remove("open");
+  showToast("Day "+day+" logged.");
+  render();
+}
+
+/* ============================================================
+   FEEDBACK PANEL (rules-based, mimics the coach's structure)
+   ============================================================ */
+function buildFeedback(day, log){
+  const sc = scheduleFor(day);
+  const pct = computeConsistency(log, sc);
+  const band = scoreBand(pct);
+  const {streaks, noZero} = computeStreaks();
+
+  const wrap = document.createElement("div");
+  wrap.className="feedback";
+
+  const doneItems=[], missedItems=[], excusedItems=[];
+  Object.keys(log.items||{}).forEach(k=>{
+    const v=log.items[k];
+    if(v==="done") doneItems.push(k);
+    else if(v==="missed") missedItems.push(k);
+    else if(v==="excused") excusedItems.push(k);
+  });
+
+  let praise = log.recoveryMode
+    ? "Recovery Mode, done properly, still counts as a DONE day. Minimums held — that's real discipline, not a loophole."
+    : (doneItems.length ? `Solid on: ${doneItems.join(", ")}.` : "Nothing marked done today — that's the starting point for tomorrow, not the end of the story.");
+
+  let callout = "";
+  if(missedItems.length){
+    callout = `Missed: ${missedItems.join(", ")} — bhai ye excuse hai. Own it, don't explain it away.`;
+  } else if(!log.recoveryMode){
+    callout = "No unexplained misses today.";
+  }
+
+  const flags = patternFlags();
+  const patternLine = flags.length ? flags[0] : "No repeat patterns flagging yet.";
+
+  let weakest = missedItems[0] || excusedItems[0];
+  const suggestion = weakest ? `Tomorrow, protect ${weakest} first — plan it before the day gets away from you.` : "Keep the same rhythm tomorrow — don't let a good day make you sloppy.";
+
+  const win = log.win ? log.win : "—";
+  const trap = log.trap ? log.trap : "Not logged — think about it before tomorrow morning's brief.";
+
+  wrap.innerHTML = `
+    <div class="ftitle">Check-in Result — Day ${day}</div>
+    <div class="fbody"><b>Praise:</b> ${praise}</div>
+    <div class="fbody"><b>Call-out:</b> ${callout}</div>
+    <div class="fbody"><b>Pattern alert:</b> ${patternLine}</div>
+    <div class="fbody"><b>Suggestion:</b> ${suggestion}</div>
+    <div class="fbody"><b>Biggest win:</b> ${win}</div>
+    <div class="fbody"><b>Tomorrow's trap:</b> ${trap}</div>
+    <div><span class="score-badge">${band.score}</span> <span class="score-band">/100 · ${band.label}</span></div>
+    <div class="streak-line">Day ${day}/100 (Week ${sc.week}). Gym: ${streaks.gym} · Badminton: ${streaks.badminton} · Diet: ${streaks.diet} · Code: ${streaks.code} · Diya bati: ${streaks.diyabati} · No-Zero-Day: ${noZero}. Consistency today: ${pct}%. Score: ${band.score}/100.</div>
+  `;
+  return wrap;
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function renderDashboard(){
+  const cur = currentDay();
+  const weekStart = cur - ((cur-1)%7);
+  const weekLogs=[];
+  for(let d=weekStart; d<=Math.min(weekStart+6,cur); d++){
+    const log = currentCycle().logs[d];
+    if(log) weekLogs.push({day:d, log});
+  }
+  const domains = ["gym","badminton","dsa","block2","diyabati","chores","bodycare"];
+  const labels = {gym:"Gym",badminton:"Badminton",dsa:"Code (DSA)",block2:"Code (Block 2)",diyabati:"Diya bati",chores:"Chores",bodycare:"Body care"};
+  let html="";
+  domains.forEach(k=>{
+    let done=0, total=0;
+    weekLogs.forEach(({log})=>{
+      const st = log.items[k];
+      if(st===undefined) return;
+      if(st==="excused"||st==="na") return;
+      total++;
+      if(st==="done") done++;
+    });
+    const pct = total? Math.round((done/total)*100) : 0;
+    html += `<div class="bar-row"><div class="bar-label">${labels[k]}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><div class="bar-pct">${total?pct+'%':'—'}</div></div>`;
+  });
+  document.getElementById("weekBars").innerHTML = html || `<div class="empty-state">No check-ins logged this week yet.</div>`;
+
+  const flags = patternFlags();
+  document.getElementById("flagsBox").innerHTML = flags.length
+    ? flags.map(f=>`<div class="flag"><span class="ico">⚠</span><div>${f}</div></div>`).join("")
+    : `<div class="empty-state">No patterns flagged yet.</div>`;
+
+  // monthly milestone check: is today's date a Sunday that is the first Sunday on/after a 30/60/90/100 day milestone
+  const sc = scheduleFor(cur);
+  const milestoneCard = document.getElementById("milestoneCard");
+  if(sc.isSunday && [30,60,90,100].some(m=>isFirstSundayOnOrAfter(m,cur))){
+    milestoneCard.style.display="block";
+    document.getElementById("milestoneBox").innerHTML = `<p class="muted">This Sunday folds in a Monthly Review: weight trend, NeetCode completion %, SD/LLD progress, job search metrics, body care & spiritual consistency, biggest achievement, biggest recurring issue, one focus habit for next month. Use the History tab to pull the numbers.</p>`;
+  } else {
+    milestoneCard.style.display="none";
+  }
+}
+function isFirstSundayOnOrAfter(milestoneDay, cur){
+  if(cur<milestoneDay) return false;
+  // find first Sunday on/after milestoneDay
+  let d=milestoneDay;
+  while(scheduleFor(d).weekday!==0) d++;
+  return d===cur;
+}
+
+/* ============================================================
+   HISTORY
+   ============================================================ */
+function renderHistory(){
+  const logs = currentCycle().logs;
+  const days = Object.keys(logs).map(k=>parseInt(k,10)).sort((a,b)=>b-a);
+  if(!days.length){ document.getElementById("historyBox").innerHTML = `<div class="empty-state">Nothing logged yet.</div>`; return; }
+  document.getElementById("historyBox").innerHTML = days.map(d=>{
+    const log = logs[d];
+    const sc = scheduleFor(d);
+    const pct = computeConsistency(log, sc);
+    const band = scoreBand(pct);
+    return `<div class="hist-row" data-day="${d}"><div class="hist-day">Day ${d}</div><div>${WEEKDAY_NAMES[sc.weekday]}, ${fmtDate(sc.date)}${log.recoveryMode?' · Recovery':''}</div><div class="hist-score">${band.score}</div></div>`;
+  }).join("");
+  document.querySelectorAll("#historyBox .hist-row").forEach(row=>{
+    row.addEventListener("click",()=>openDetail(parseInt(row.dataset.day,10)));
+  });
+}
+
+/* ============================================================
+   DAY DETAIL MODAL
+   ============================================================ */
+function openDetail(day){
+  const log = currentCycle().logs[day];
+  const sc = scheduleFor(day);
+  document.getElementById("detailTitle").textContent = `Day ${day} — ${WEEKDAY_NAMES[sc.weekday]}, ${fmtDate(sc.date)}`;
+  const body = document.getElementById("detailBody");
+  if(!log){
+    body.innerHTML = `<p class="muted">No check-in logged for this day.</p>`;
+  } else {
+    body.innerHTML = "";
+    body.appendChild(buildFeedback(day, log));
+    if(log.notes) body.innerHTML += `<div class="card" style="margin-top:10px;"><h3 style="font-size:13px;">Notes</h3><p class="muted">${log.notes}</p></div>`;
+    const editBtn = document.createElement("button");
+    editBtn.className="btn secondary";
+    editBtn.textContent="Edit This Day";
+    editBtn.style.marginTop="10px";
+    editBtn.addEventListener("click",()=>{ document.getElementById("detailModal").classList.remove("open"); openCheckinModal(day); });
+    body.appendChild(editBtn);
+  }
+  document.getElementById("detailModal").classList.add("open");
+}
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+function renderSettings(){
+  document.getElementById("startDateInput").value = state.config.startDate;
+  document.getElementById("interviewToggle").checked = !!state.config.interviewActive;
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2600);
+}
+
+/* ============================================================
+   EVENT WIRING
+   ============================================================ */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+document.getElementById("openCheckin").addEventListener("click",()=>openCheckinModal(currentDay()));
+document.getElementById("editCheckin").addEventListener("click",()=>openCheckinModal(currentDay()));
+document.getElementById("closeModal").addEventListener("click",()=>document.getElementById("checkinModal").classList.remove("open"));
+document.getElementById("cancelCheckin").addEventListener("click",()=>document.getElementById("checkinModal").classList.remove("open"));
+document.getElementById("submitCheckin").addEventListener("click",saveCheckin);
+document.getElementById("closeDetail").addEventListener("click",()=>document.getElementById("detailModal").classList.remove("open"));
+document.getElementById("closeDetailBtn").addEventListener("click",()=>document.getElementById("detailModal").classList.remove("open"));
+
+document.getElementById("bingeToggle").addEventListener("change",e=>{
+  document.getElementById("bingeFields").style.display = e.target.checked? "block":"none";
+});
+["energy","motivation","discipline"].forEach(k=>{
+  document.getElementById(k+"Slider").addEventListener("input",e=>{
+    document.getElementById(k+"Val").textContent = e.target.value;
+  });
+});
+
+document.getElementById("saveSettings").addEventListener("click",()=>{
+  state.config.startDate = document.getElementById("startDateInput").value || state.config.startDate;
+  state.config.interviewActive = document.getElementById("interviewToggle").checked;
+  save();
+  showToast("Settings saved.");
+  render();
+});
+
+document.getElementById("continueBtn").addEventListener("click",()=>{
+  showToast("Continuing past Day 100 — same cycle, streaks intact.");
+  render();
+});
+
+document.getElementById("restartBtn").addEventListener("click",()=>{
+  if(!confirm("Restart will archive this cycle's logs and begin Day 1 again tomorrow. Continue?")) return;
+  state.archivedCycles.push({cycle:state.config.cycle, config:{...state.config}, logs:currentCycle().logs});
+  const newCycle = state.config.cycle+1;
+  state.cycles[newCycle] = {logs:{}};
+  state.config.cycle = newCycle;
+  state.config.startDate = todayISO();
+  save();
+  showToast("New cycle started. Day 1 begins today.");
+  render();
+});
+
+document.getElementById("wipeBtn").addEventListener("click",()=>{
+  if(!confirm("This erases everything — all cycles, all history. Are you sure?")) return;
+  localStorage.removeItem(STORE_KEY);
+  state = defaultState();
+  save();
+  showToast("All data erased.");
+  render();
+});
+
+document.getElementById("exportBtn").addEventListener("click",()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="100-day-tracker-backup.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById("importBtn").addEventListener("click",()=>document.getElementById("importFile").click());
+document.getElementById("importFile").addEventListener("change",e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = evt=>{
+    try{
+      const parsed = JSON.parse(evt.target.result);
+      if(!parsed.config || !parsed.cycles) throw new Error("bad file");
+      state = parsed;
+      save();
+      showToast("Data imported.");
+      render();
+    }catch(err){
+      showToast("Import failed — invalid file.");
+    }
+  };
+  reader.readAsText(file);
+});
+
+/* init */
+render();
+})();
+</script>
+</body>
+</html>
