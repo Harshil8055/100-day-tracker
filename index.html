@@ -541,16 +541,17 @@ function computeStreaks(){
     };
     upd("gym", !sc.gymIsRest);
     upd("badminton", sc.badminton);
-    upd("code", true); // dsa always scheduled
-    // remap code -> dsa key
+    // code streak tracks the "dsa" item key (DSA is always scheduled)
     const dsaSt = log.recoveryMode ? "done" : (log.items.dsa||undefined);
-    if(dsaSt==="done") {} else if(dsaSt==="missed"){ streaks.code=0; }
+    if(dsaSt==="done") streaks.code++;
+    else if(dsaSt==="missed") streaks.code=0;
+    // excused/na/undefined -> freeze, no change
     upd("diyabati", true);
-    const dietSt = log.recoveryMode ? "done" : (log.items.dietLogging||undefined);
-    if(dietSt==="missed") streaks.diet = streaks.diet; // handled via upd pattern below
 
-    // diet streak (separate since key name differs)
-    if(dietSt==="done") streaks.diet++; else if(dietSt==="missed") streaks.diet=0;
+    // diet streak tracks the "dietLogging" item key
+    const dietSt = log.recoveryMode ? "done" : (log.items.dietLogging||undefined);
+    if(dietSt==="done") streaks.diet++;
+    else if(dietSt==="missed") streaks.diet=0;
 
     // zero day check
     const gymSt = log.recoveryMode ? "done" : log.items.gym;
