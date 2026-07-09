@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Duel Mode — 100-Day Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFE9DD; --paper-alt:#E6DFCF; --panel:#F7F3E9;
+    --ink:#23201B; --ink-soft:#6B6455; --ink-faint:#9B9080;
+    --saffron:#E8961C; --saffron-deep:#C97A0D; --maroon:#8A3A2E; --moss:#4C7A52;
+    --rule:#C9BFA8; --rule-soft:#DDD5C1;
+    --p1:#C97A0D; --p2:#4E6B8F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:transparent;color:var(--ink);overflow-x:hidden;}
+  body{font-family:'Work Sans', sans-serif; font-size:14px; line-height:1.5; overflow-wrap:break-word; word-break:break-word;}
+  .app{max-width:1080px;margin:0 auto;background:var(--paper);border:1px solid var(--rule);border-radius:4px;overflow-x:hidden;}
+  .card, .banner, .setup-wrap, .setup-person{overflow-wrap:break-word; word-break:break-word;}
+  .card pre, .banner pre, code{white-space:pre-wrap !important; word-break:break-word; overflow-wrap:anywhere;}
+  .head{display:flex;align-items:flex-end;justify-content:space-between;padding:20px 28px 14px;border-bottom:2px solid var(--ink);
+    background:radial-gradient(120px 60px at 92% -10%, rgba(232,150,28,0.18), transparent 70%), var(--paper);}
+  .day-num{font-family:'Fraunces', serif;font-weight:700;font-size:44px;line-height:0.9;}
+  .day-num sup{font-size:15px;font-weight:500;color:var(--ink-soft);margin-left:2px;}
+  .head-meta .date{font-family:'Fraunces', serif;font-style:italic;font-size:15px;}
+  .head-meta .week{font-family:'IBM Plex Mono', monospace;font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;}
+  .vs-mini{display:flex;gap:10px;align-items:center;font-family:'IBM Plex Mono', monospace;font-size:11px;}
+  .vs-mini .who{padding:4px 10px;border-radius:14px;border:1px solid var(--rule);}
+  .vs-mini .who.lead{font-weight:700;}
+  .nav{display:flex;border-bottom:1px solid var(--rule);background:var(--paper-alt);overflow-x:auto;}
+  .nav button{all:unset;cursor:pointer;padding:11px 16px;font-family:'IBM Plex Mono', monospace;font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);border-right:1px solid var(--rule-soft);white-space:nowrap;}
+  .nav button.active{color:var(--ink);background:var(--paper);box-shadow: inset 0 -2px 0 var(--saffron);}
+  .person-switch{display:flex;gap:8px;padding:10px 28px 0;}
+  .person-switch button{all:unset;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 14px;border-radius:16px;border:1.5px solid var(--rule);color:var(--ink-soft);}
+  .person-switch button.active.p1sel{border-color:var(--p1);color:var(--p1);background:#FBF0DC;}
+  .person-switch button.active.p2sel{border-color:var(--p2);color:var(--p2);background:#EAF0F7;}
+  .content{padding:20px 28px 40px;}
+  h2.section-title{font-family:'Fraunces', serif;font-weight:600;font-size:19px;margin:0 0 4px;}
+  .section-sub{color:var(--ink-soft);font-size:12.5px;margin:0 0 16px;}
+  .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;}
+  .grid2v{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:820px){ .grid2, .grid2v{grid-template-columns:1fr;} }
+  .card{background:var(--panel);border:1px solid var(--rule-soft);border-radius:6px;padding:15px 17px;margin-bottom:14px;}
+  .card h3{font-family:'Fraunces', serif;font-size:14.5px;margin:0 0 9px;display:flex;align-items:center;gap:7px;}
+  .row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--rule-soft);font-size:13px;}
+  .row:last-child{border-bottom:none;}
+  .row .label{color:var(--ink-soft);}
+  .row .val{font-weight:600;text-align:right;}
+  .status-group{display:flex;gap:6px;flex-wrap:wrap;}
+  .status-group button{all:unset;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;padding:5px 8px;border:1px solid var(--rule);border-radius:4px;color:var(--ink-soft);background:var(--paper);}
+  .status-group button.sel-done{background:var(--moss);border-color:var(--moss);color:#fff;}
+  .status-group button.sel-excused{background:#D9C68A;border-color:#C7B274;color:#3A3320;}
+  .status-group button.sel-missed{background:var(--maroon);border-color:var(--maroon);color:#fff;}
+  .status-group button.sel-recovery{background:#7C86A8;border-color:#7C86A8;color:#fff;}
+  .field{margin-bottom:11px;}
+  .field label{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;}
+  .field input, .field select, .field textarea{width:100%;font-family:'Work Sans',sans-serif;font-size:13.5px;padding:7px 9px;border:1px solid var(--rule);border-radius:4px;background:#fff;color:var(--ink);}
+  .inline-fields{display:flex;gap:10px;}
+  .inline-fields > div{flex:1;}
+  .btn{all:unset;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;padding:10px 18px;border-radius:4px;background:var(--ink);color:var(--paper);display:inline-block;}
+  .btn.secondary{background:transparent;border:1px solid var(--ink);color:var(--ink);}
+  .btn.small{padding:6px 11px;font-size:10.5px;}
+  .btn[disabled]{opacity:0.4;cursor:not-allowed;}
+  table.log{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.log th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--ink);padding:6px 8px;}
+  table.log td{padding:6px 8px;border-bottom:1px solid var(--rule-soft);}
+  .heat-row{display:flex;gap:3px;align-items:center;margin-bottom:6px;}
+  .heat-row .heat-label{width:90px;font-size:10.5px;color:var(--ink-soft);flex-shrink:0;}
+  .heat-cell{width:18px;height:18px;border-radius:3px;background:var(--rule-soft);flex-shrink:0;}
+  .heat-cell[data-s="done"]{background:var(--moss);}
+  .heat-cell[data-s="excused"]{background:#D9C68A;}
+  .heat-cell[data-s="missed"]{background:var(--maroon);}
+  .heat-cell[data-s="recovery"]{background:#7C86A8;}
+  .banner{border:1px solid var(--saffron-deep);background:#FBF0DC;border-radius:6px;padding:13px 15px;margin-bottom:16px;font-size:13px;}
+  .banner strong{color:var(--saffron-deep);}
+  .lockbanner{border:1px solid var(--maroon);background:#F5E3DE;color:var(--maroon);border-radius:6px;padding:12px 15px;margin-bottom:16px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;}
+  .empty{color:var(--ink-faint);font-style:italic;font-size:12.5px;padding:8px 0;}
+  .setup-wrap{padding:34px;}
+  .setup-person{border:1px solid var(--rule-soft);border-radius:8px;padding:18px 20px;margin-bottom:16px;}
+  .setup-person.p1b{border-left:5px solid var(--p1);}
+  .setup-person.p2b{border-left:5px solid var(--p2);}
+  .ledger-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px dashed var(--rule-soft);}
+  .save-bar{position:sticky;bottom:0;display:flex;justify-content:space-between;align-items:center;background:var(--paper);border-top:1px solid var(--rule);padding:12px 28px;margin:0 -28px -40px;}
+  .save-msg{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--moss);}
+  .big-balance{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+(function(){
+
+/* ============ SHARED PLAN DATA ============ */
+const GYM = {0:"Rest from gym & badminton",1:"Chest & Shoulder",2:"Back & Arms",3:"Legs & Core",4:"Shoulder & Chest",5:"Arms & Back",6:"Rest / active recovery"};
+const GYM_SCHEDULED = {0:false,1:true,2:true,3:true,4:true,5:true,6:true};
+const BADMINTON = {0:false,1:true,2:true,3:true,4:false,5:true,6:true};
+const TEMPLE = {5:true,6:true};
+const CHORE_EXTRA = {4:"Laundry",6:"Bathroom clean",0:"Laundry + bedsheet + doormats"};
+const BODY_FULL = {
+  1:{face:"Cleanser → Salicylic → Moisturizer → Lip balm",body:"De-tan pack → Lotion → Almond oil",hair:"Hair oil + Scalp ointment"},
+  2:{face:"Cleanser → Retinol → Moisturizer → Lip balm",body:"Glycolic acid → Lotion",hair:"Hair oil if missed Mon; else rest"},
+  3:{face:"Cleanser → Moisturizer",body:"Shower + gentle scrub → Lotion",hair:"Wash day"},
+  4:{face:"Cleanser → Retinol → Moisturizer",body:"De-tan pack → Lotion",hair:"Scalp ointment"},
+  5:{face:"Cleanser → Salicylic → Moisturizer",body:"Glycolic acid → Lotion",hair:"Hair oil + Scalp ointment"},
+  6:{face:"Cleanser → Retinol → Moisturizer",body:"Moisturize only",hair:"Hair mask"},
+  0:{face:"Face pack → Moisturizer → Lip balm",body:"Spa + Lotion + Almond oil",hair:"Wash day"}
+};
+const NIGHT_FACE = {
+  1:"Cleanser → Salicylic → Moisturizer",2:"Cleanser → Retinol → Moisturizer",3:"Cleanser → Moisturizer",
+  4:"Cleanser → Retinol → Moisturizer",5:"Cleanser → Salicylic → Moisturizer",6:"Cleanser → Retinol → Moisturizer",0:"Face pack → Moisturizer"
+};
+const SD_WEEK = {1:"Done: Ch1–3 (Scale, Estimation, Framework)",2:"Ch4: Rate Limiter",3:"Ch5: Consistent Hashing",4:"Ch6: Key-Value Store",
+  5:"Ch7: Unique ID Generator",6:"Ch8: URL Shortener",7:"Ch9: Web Crawler",8:"Ch10: Notification System (tie to ASB)",9:"Ch11: News Feed System",
+  10:"Ch12–13: Chat System, Search Autocomplete",11:"Ch14: Video Streaming (skim) + revision begins",12:"Full mock mode: 1 HLD mock/week",13:"Full mock mode: 1 HLD mock/week"};
+const LLD_WEEK = {2:"Parking Lot System",3:"Elevator System",4:"Library Management System",6:"Splitwise / Expense Sharing",8:"Tic-Tac-Toe / Chess",10:"Rate Limiter (in-process)"};
+const TOPIC_WEEK = {1:"C# deep-dive: delegates, generics, LINQ, GC/boxing, SOLID",2:"Design Patterns I: Singleton, Factory, Builder, Adapter, Decorator",
+  3:"Design Patterns II: Strategy, Observer, CoR + Async/await",4:"(SD/LLD only this week)",5:"Azure Core: App Service, Functions, Storage, Key Vault; Microservices",
+  6:"Azure Service Bus: queues vs topics, dead-lettering, sessions; Kafka conceptual",7:"(SD only this week)",8:"SQL + LINQ mastery: indexing, joins, window functions",
+  9:"CI/CD stages, blue-green/canary; Kubernetes concepts only",10:"React refresh: hooks, component design, state management",
+  11:"Revision + full mock mode",12:"Revision + full mock mode",13:"Revision + full mock mode"};
+function weekOf(dIdx){ return Math.min(13, Math.max(1, Math.ceil(dIdx/7))); }
+function codeBlock2Label(dow, dIdx){
+  const wk = weekOf(dIdx);
+  if(dow===1||dow===3||dow===5){ let l = "SD — "+SD_WEEK[wk]; if(LLD_WEEK[wk]) l += " · LLD: "+LLD_WEEK[wk]; return l; }
+  if(dow===2||dow===4||dow===6){ return "Topic — " + TOPIC_WEEK[wk]; }
+  return null;
+}
+function fullCodeWeekTable(currentWeek){
+  let rows = "";
+  for(let w=1; w<=13; w++){
+    const hi = w===currentWeek ? 'style="background:#FBF0DC;font-weight:600;"' : "";
+    rows += `<tr ${hi}><td>${w}${w===currentWeek?" ◂":""}</td><td>${SD_WEEK[w]}</td><td>${LLD_WEEK[w]||"—"}</td><td>${TOPIC_WEEK[w]}</td></tr>`;
+  }
+  rows += `<tr ${currentWeek>13?'style="background:#FBF0DC;font-weight:600;"':""}><td>14+</td><td colspan="3">Bonus sprint (Days 91–100): 1 DSA/SD/LLD/behavioral mock each per week + job-search follow-ups</td></tr>`;
+  return `<table class="log"><thead><tr><th>Wk</th><th>SD (Mon/Wed/Fri)</th><th>LLD</th><th>Topic (Tue/Thu/Sat)</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function fullBodyWeekTable(currentDow){
+  const order = [1,2,3,4,5,6,0];
+  const names = {1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri",6:"Sat",0:"Sun"};
+  let rows = order.map(d=>{
+    const hi = d===currentDow ? 'style="background:#FBF0DC;font-weight:600;"' : "";
+    const b = BODY_FULL[d];
+    return `<tr ${hi}><td>${names[d]}${d===currentDow?" ◂":""}</td><td>${b.face}</td><td>${b.body}</td><td>${b.hair}</td></tr>`;
+  }).join("");
+  return `<table class="log"><thead><tr><th>Day</th><th>Face (night)</th><th>Body (night)</th><th>Hair</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function fullNightFaceTable(currentDow){
+  const order = [1,2,3,4,5,6,0];
+  const names = {1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri",6:"Sat",0:"Sun"};
+  let rows = order.map(d=>{
+    const hi = d===currentDow ? 'style="background:#FBF0DC;font-weight:600;"' : "";
+    return `<tr ${hi}><td>${names[d]}${d===currentDow?" ◂":""}</td><td>${NIGHT_FACE[d]}</td></tr>`;
+  }).join("");
+  return `<table class="log"><thead><tr><th>Day</th><th>Night face routine</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+const TIME_COST = { gym:60, badminton:60, dsa:60, interviewPrep:60, dietLogged:10, diyaBati:5, chores:30, bodyCare:20, nightFace:15, temple:30 };
+
+const PROFILE = {
+  full: { core:["dsa","diyaBati","dietLogged"], always:["chores","bodyCare"], codeField:"dsa", codeLabel:"DSA" },
+  fitnessPlus: { core:["interviewPrep","dietLogged"], always:["nightFace"], codeField:"interviewPrep", codeLabel:"Interview Prep" }
+};
+
+/* ============ DATE HELPERS ============ */
+function pad(n){return n<10?"0"+n:""+n;}
+function isoOf(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function isoToDate(iso){const [y,m,d]=iso.split("-").map(Number); return new Date(y,m-1,d);}
+function addDays(iso,n){const d=isoToDate(iso); d.setDate(d.getDate()+n); return isoOf(d);}
+function dayIndexOf(iso,startISO){const d=isoToDate(iso); const s=isoToDate(startISO); return Math.round((d-s)/86400000)+1;}
+function isoOfDayIndex(n,startISO){return addDays(startISO,n-1);}
+function weekdayName(iso){return isoToDate(iso).toLocaleDateString('en-US',{weekday:'long'});}
+function prettyDate(iso){const d=isoToDate(iso); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function todayISO(){return isoOf(new Date());}
+
+/* ============ STORAGE (window.storage = local fallback; Firestore = shared cloud sync) ============ */
+const STORE_KEY = "duel-tracker-state-v1";
+const FB_CONFIG_KEY = "duel-firebase-config-v1";
+let state = null;
+let fb = { app:null, db:null, auth:null, docRef:null, enabled:false, roomCode:"", unsub:null, lastLocalWriteTs:0, status:"offline" };
+
+async function loadFirebaseConfig(){
+  try{
+    const res = await window.storage.get(FB_CONFIG_KEY, false);
+    if(res && res.value) return JSON.parse(res.value);
+  }catch(e){}
+  return null;
+}
+async function saveFirebaseConfig(cfgJson, roomCode){
+  await window.storage.set(FB_CONFIG_KEY, JSON.stringify({cfgJson, roomCode}), false);
+}
+async function clearFirebaseConfig(){
+  try{ await window.storage.delete(FB_CONFIG_KEY, false); }catch(e){}
+  if(fb.unsub) fb.unsub();
+  fb = { app:null, db:null, auth:null, docRef:null, enabled:false, roomCode:"", unsub:null, lastLocalWriteTs:0, status:"offline" };
+}
+async function connectFirebase(cfgJsonStr, roomCode){
+  const cfg = JSON.parse(cfgJsonStr);
+  fb.app = initializeApp(cfg, "duel-"+roomCode);
+  fb.db = getFirestore(fb.app);
+  fb.auth = getAuth(fb.app);
+  await signInAnonymously(fb.auth);
+  fb.roomCode = roomCode;
+  fb.docRef = doc(fb.db, "duelTrackers", roomCode);
+  fb.enabled = true;
+  fb.status = "connecting";
+  await saveFirebaseConfig(cfgJsonStr, roomCode);
+  subscribeFirestore();
+}
+function subscribeFirestore(){
+  if(fb.unsub) fb.unsub();
+  fb.unsub = onSnapshot(fb.docRef, (snap)=>{
+    fb.status = "synced";
+    if(!snap.exists()){ pushStateToFirestore(); return; }
+    const data = snap.data();
+    if(data._writeTs && Math.abs(data._writeTs - fb.lastLocalWriteTs) < 900) { render(); return; } // our own echo, state already current
+    if(data.payload){ state = JSON.parse(data.payload); render(); }
+  }, (err)=>{ console.error("Firestore sync error", err); fb.status="error"; render(); });
+}
+async function pushStateToFirestore(){
+  if(!fb.enabled || !fb.docRef) return;
+  const ts = Date.now();
+  fb.lastLocalWriteTs = ts;
+  try{ await setDoc(fb.docRef, { payload: JSON.stringify(state), _writeTs: ts }, { merge:true }); }
+  catch(e){ console.error("Firestore write failed", e); fb.status="error"; }
+}
+
+function defaultState(){
+  return {
+    setup:{
+      locked:false,
+      startISO: todayISO(),
+      lengthDays:100,
+      hourlyRate:{p1:500,p2:500},
+      startingBalance:{p1:5000,p2:5000},
+      people:{
+        p1:{name:"", profile:"full", startWeight:85, targetWeight:75},
+        p2:{name:"", profile:"fitnessPlus", startWeight:73, targetWeight:55}
+      }
+    },
+    entries:{p1:{}, p2:{}},
+    dsaLog:{p1:[], p2:[]},
+    meta:{ interviewScheduledP1:false, scratch:{} }
+  };
+}
+function emptyEntry(profileKey, iso){
+  const dow = isoToDate(iso).getDay();
+  const base = {
+    iso, gym: GYM_SCHEDULED[dow]?"":"", gymHome:false,
+    badminton: BADMINTON[dow]?"":"", badmintonSteps:"",
+    dietLogged:"", calories:"", protein:"", sugarFree:false, packetFree:false, maidaFree:false, waterL:"",
+    temple: TEMPLE[dow]?"":"",
+    sleepHrs:"", weightKg:"",
+    win:"", trap:"", notes:""
+  };
+  if(profileKey==="full"){
+    Object.assign(base,{ dsa:"", dsaMinutes:"", dsaConfidence:"", codeBlock2:"", codeBlock3:"", diyaBati:"", chores:"", bodyCare:"" });
+  } else {
+    Object.assign(base,{ interviewPrep:"", nightFace:"" });
+  }
+  return base;
+}
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORE_KEY, false);
+    state = (res && res.value) ? JSON.parse(res.value) : defaultState();
+  }catch(e){ state = defaultState(); }
+  if(!state.meta) state.meta = { interviewScheduledP1:false, scratch:{} };
+  if(!state.dsaLog) state.dsaLog = {p1:[],p2:[]};
+
+  const fbc = await loadFirebaseConfig();
+  if(fbc && fbc.cfgJson && fbc.roomCode){
+    try{ await connectFirebase(fbc.cfgJson, fbc.roomCode); }
+    catch(e){ console.error("auto-connect failed", e); fb.status="error"; }
+  }
+}
+let saveTimer=null;
+function persist(showMsg){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{ await window.storage.set(STORE_KEY, JSON.stringify(state), false); if(showMsg) flashSave(); }
+    catch(e){ console.error("local save failed", e); }
+    if(fb.enabled) pushStateToFirestore();
+  }, 250);
+}
+function flashSave(){
+  const el = document.getElementById("save-msg"); if(!el) return;
+  el.textContent = (fb.enabled? "☁ Firebase synced ✓ ":"Saved ✓ ") + new Date().toLocaleTimeString();
+  el.style.opacity = 1; setTimeout(()=>{ el.style.opacity = 0.45; }, 1400);
+}
+function getEntry(person, iso){
+  const profileKey = state.setup.people[person].profile;
+  if(!state.entries[person][iso]) state.entries[person][iso] = emptyEntry(profileKey, iso);
+  return state.entries[person][iso];
+}
+
+/* ============ CHALLENGE WINDOW ============ */
+function endISO(){ return addDays(state.setup.startISO, state.setup.lengthDays-1); }
+function challengeOver(){ return todayISO() > endISO(); }
+function clampToWindow(iso){
+  if(iso < state.setup.startISO) return state.setup.startISO;
+  if(iso > endISO()) return endISO();
+  return iso;
+}
+
+/* ============ NON-NEGOTIABLES / STREAKS / SCORING ============ */
+function statusCountsAsDone(v){ return v==="done" || v==="recovery"; }
+function nonNegList(person, iso){
+  const profileKey = state.setup.people[person].profile;
+  const cfg = PROFILE[profileKey];
+  const dow = isoToDate(iso).getDay();
+  let list = cfg.core.slice();
+  if(GYM_SCHEDULED[dow]) list.push("gym");
+  if(BADMINTON[dow]) list.push("badminton");
+  if(TEMPLE[dow]) list.push("temple");
+  list = list.concat(cfg.always);
+  return list;
+}
+function consistencyFor(person, iso){
+  const e = state.entries[person][iso]; if(!e) return null;
+  const list = nonNegList(person, iso);
+  let num=0, den=0;
+  list.forEach(f=>{
+    const v = f==="dietLogged" ? (e.dietLogged==="yes"?"done":e.dietLogged==="no"?"missed":"") : e[f];
+    if(v==="" || v===undefined) return;
+    if(v==="excused" || v==="na") return;
+    den++;
+    if(statusCountsAsDone(v)) num++;
+  });
+  if(den===0) return null;
+  return Math.round((num/den)*100);
+}
+function computeStreak(person, field, uptoIso){
+  const upto = dayIndexOf(uptoIso, state.setup.startISO);
+  let streak=0;
+  for(let n=1;n<=upto;n++){
+    const iso = isoOfDayIndex(n, state.setup.startISO);
+    const e = state.entries[person][iso];
+    const v = e ? (field==="dietLogged" ? (e.dietLogged==="yes"?"done":e.dietLogged==="no"?"missed":"") : e[field]) : "";
+    if(v===""||v===undefined) continue;
+    if(v==="excused"||v==="na") continue;
+    if(statusCountsAsDone(v)) streak++;
+    else if(v==="missed") streak=0;
+  }
+  return streak;
+}
+function isZeroDay(person, e){
+  if(!e) return false;
+  const profileKey = state.setup.people[person].profile;
+  const codeField = PROFILE[profileKey].codeField;
+  const codeMiss = e[codeField]==="missed" || e[codeField]==="" || e[codeField]===undefined;
+  const dietMiss = e.dietLogged!=="yes";
+  const gymMiss = !(e.gym==="done"||e.gym==="recovery"||e.gymHome);
+  const spiritMiss = profileKey==="full" ? (e.diyaBati==="missed"||e.diyaBati==="") : false;
+  return codeMiss && dietMiss && gymMiss && (profileKey==="full"?spiritMiss:true);
+}
+function noZeroDayStreak(person, uptoIso){
+  const upto = dayIndexOf(uptoIso, state.setup.startISO);
+  let streak=0;
+  for(let n=1;n<=upto;n++){
+    const e = state.entries[person][isoOfDayIndex(n, state.setup.startISO)];
+    if(!e) continue;
+    if(isZeroDay(person,e)) streak=0; else streak++;
+  }
+  return streak;
+}
+
+/* ============ PENALTIES / BALANCES ============ */
+function penaltyTotalsUpTo(uptoIso){
+  const upto = Math.min(dayIndexOf(uptoIso, state.setup.startISO), state.setup.lengthDays);
+  let total = {p1:0, p2:0};
+  let txns = [];
+  for(let n=1;n<=upto;n++){
+    const iso = isoOfDayIndex(n, state.setup.startISO);
+    ["p1","p2"].forEach(person=>{
+      const e = state.entries[person][iso]; if(!e) return;
+      const list = nonNegList(person, iso);
+      list.forEach(f=>{
+        const v = f==="dietLogged" ? (e.dietLogged==="yes"?"done":e.dietLogged==="no"?"missed":"") : e[f];
+        if(v==="missed"){
+          const mins = TIME_COST[f] || 30;
+          const rate = state.setup.hourlyRate[person] || 0;
+          const cost = Math.round((mins/60)*rate);
+          total[person]+=cost;
+          txns.push({iso, person, field:f, cost});
+        }
+      });
+    });
+  }
+  return {total, txns};
+}
+function balances(uptoIso){
+  const {total} = penaltyTotalsUpTo(uptoIso);
+  const bal1 = state.setup.startingBalance.p1 - total.p1 + total.p2;
+  const bal2 = state.setup.startingBalance.p2 - total.p2 + total.p1;
+  return {p1:bal1, p2:bal2, penalty:total};
+}
+
+/* ============ SHELL ============ */
+let activeTab = "today";
+let activePerson = "p1";
+let selectedISO = todayISO();
+
+function root(){ return document.getElementById("app"); }
+function fmtStatusButtons(container, field, options, entry, extra){
+  container.innerHTML="";
+  const grp = document.createElement("div"); grp.className="status-group";
+  options.forEach(([val,label])=>{
+    const b=document.createElement("button");
+    b.textContent=label;
+    if(entry[field]===val) b.classList.add("sel-"+val);
+    b.onclick=()=>{ entry[field]=(entry[field]===val?"":val); render(); persist(true); };
+    grp.appendChild(b);
+  });
+  container.appendChild(grp);
+}
+
+async function init(){ await loadState(); render(); }
+
+function render(){
+  if(!state.setup.locked){ renderSetupScreen(); return; }
+  selectedISO = clampToWindow(selectedISO);
+  const iso = selectedISO;
+  const dIdx = dayIndexOf(iso, state.setup.startISO);
+  const bal = balances(iso);
+  const n1 = state.setup.people.p1.name || "Person 1";
+  const n2 = state.setup.people.p2.name || "Person 2";
+  const c1 = consistencyFor("p1", iso), c2 = consistencyFor("p2", iso);
+  const leader = c1!==null&&c2!==null ? (c1>c2? "p1": c2>c1? "p2":"tie") : null;
+
+  root().innerHTML = `
+    <div class="head">
+      <div style="display:flex;align-items:flex-end;gap:14px;">
+        <div class="day-num">${dIdx>=1&&dIdx<=state.setup.lengthDays?dIdx:'—'}<sup>/${state.setup.lengthDays}</sup></div>
+        <div class="head-meta">
+          <div class="date">${weekdayName(iso)}, ${prettyDate(iso)}</div>
+          <div class="week">Challenge ${prettyDate(state.setup.startISO)} → ${prettyDate(endISO())}${challengeOver()?" · OVER":""}</div>
+        </div>
+      </div>
+      <div class="vs-mini">
+        ${fb.enabled? `<span class="pill" style="font-size:10px;padding:4px 9px;${fb.status==='synced'?'border-color:var(--moss);color:var(--moss);':fb.status==='error'?'border-color:var(--maroon);color:var(--maroon);':''}" title="Firebase room: ${fb.roomCode}">${fb.status==='synced'?'☁ Synced':fb.status==='connecting'?'☁ Connecting…':fb.status==='error'?'☁ Sync error':'☁ Firebase'}</span>` : `<span class="pill" style="font-size:10px;padding:4px 9px;">📴 Local only</span>`}
+        <span class="who ${leader==='p1'?'lead':''}" style="color:var(--p1);border-color:var(--p1);">${n1}: ₹${bal.p1}</span>
+        <span style="color:var(--ink-faint);">vs</span>
+        <span class="who ${leader==='p2'?'lead':''}" style="color:var(--p2);border-color:var(--p2);">${n2}: ₹${bal.p2}</span>
+        <button class="pill" style="cursor:pointer;padding:5px 9px;" id="prev-day" title="Previous day">◂</button>
+        <input type="date" id="date-picker" value="${iso}" min="${state.setup.startISO}" max="${endISO()}" style="font-family:'IBM Plex Mono',monospace;font-size:11px;border:1px solid var(--rule);border-radius:4px;padding:5px 7px;background:var(--panel);margin-left:4px;"/>
+        <button class="pill" style="cursor:pointer;padding:5px 9px;" id="next-day" title="Next day">▸</button>
+        <button class="pill" style="cursor:pointer;padding:5px 9px;" id="today-btn" title="Jump to today">today</button>
+      </div>
+    </div>
+    <div class="nav">
+      ${navBtn('today','Today')}
+      ${navBtn('streaks','Streaks')}
+      ${navBtn('versus','Versus & Stakes')}
+      ${navBtn('log','Log')}
+      ${navBtn('weight','Weight')}
+      ${navBtn('review','Reviews')}
+      ${navBtn('setup','Setup')}
+    </div>
+    ${(activeTab==='today'||activeTab==='log')?`<div class="person-switch">
+      <button class="${activePerson==='p1'?'active p1sel':''}" onclick="window.__setPerson('p1')">● ${n1} (${state.setup.people.p1.profile==='full'?'full plan':'fitness+'})</button>
+      <button class="${activePerson==='p2'?'active p2sel':''}" onclick="window.__setPerson('p2')">● ${n2} (${state.setup.people.p2.profile==='full'?'full plan':'fitness+'})</button>
+    </div>`:""}
+    <div class="content" id="tab-content"></div>
+    <div class="save-bar"><span class="save-msg" id="save-msg" style="opacity:.45">Autosaves as you go</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-faint)">Keep reopening this same tracker.</span></div>
+  `;
+  document.getElementById("date-picker").onchange=(ev)=>{ selectedISO=ev.target.value; render(); };
+  document.getElementById("prev-day").onclick=()=>{ selectedISO = clampToWindow(addDays(selectedISO,-1)); render(); };
+  document.getElementById("next-day").onclick=()=>{ selectedISO = clampToWindow(addDays(selectedISO,1)); render(); };
+  document.getElementById("today-btn").onclick=()=>{ selectedISO = clampToWindow(todayISO()); render(); };
+
+  const tab = document.getElementById("tab-content");
+  if(activeTab==="today") renderToday(tab, iso);
+  if(activeTab==="streaks") renderStreaks(tab, iso);
+  if(activeTab==="versus") renderVersus(tab, iso);
+  if(activeTab==="log") renderLog(tab, iso);
+  if(activeTab==="weight") renderWeight(tab, iso);
+  if(activeTab==="review") renderReview(tab, iso);
+  if(activeTab==="setup") renderLockedSetupView(tab);
+}
+function navBtn(id,label){ return `<button class="${activeTab===id?'active':''}" onclick="window.__setTab('${id}')">${label}</button>`; }
+window.__setTab = function(id){ activeTab=id; render(); };
+window.__setPerson = function(p){ activePerson=p; render(); };
+
+/* ============ SETUP SCREEN (pre-lock) ============ */
+function renderSetupScreen(){
+  const s = state.setup;
+  root().innerHTML = `
+    <div class="setup-wrap">
+      <h2 class="section-title" style="font-size:26px;">Set up the Duel</h2>
+      <p class="section-sub">Configure everything now — once you lock it in, names, weights, dates, rate, and balance are frozen until the challenge ends.</p>
+
+      <div class="setup-person p1b">
+        <h3 style="font-family:'Fraunces',serif;color:var(--p1);margin:0 0 10px;">Person 1 — full plan</h3>
+        <div class="inline-fields">
+          <div class="field"><label>Name</label><input id="p1-name" value="${s.people.p1.name}"/></div>
+          <div class="field"><label>Starting weight (kg)</label><input type="number" id="p1-sw" value="${s.people.p1.startWeight}"/></div>
+          <div class="field"><label>Target weight (kg)</label><input type="number" id="p1-tw" value="${s.people.p1.targetWeight}"/></div>
+        </div>
+        <div class="inline-fields">
+          <div class="field"><label>Hourly rate (₹) — prices missed tasks</label><input type="number" id="p1-rate" value="${s.hourlyRate.p1}"/></div>
+          <div class="field"><label>Starting balance / stake (₹)</label><input type="number" id="p1-bal" value="${s.startingBalance.p1}"/></div>
+        </div>
+        <p class="section-sub" style="margin:6px 0 0;">Tracks: gym, badminton, DSA/code, diet+water, diya bati, temple, chores, full body care.</p>
+      </div>
+
+      <div class="setup-person p2b">
+        <h3 style="font-family:'Fraunces',serif;color:var(--p2);margin:0 0 10px;">Person 2 — fitness + light plan</h3>
+        <div class="inline-fields">
+          <div class="field"><label>Name</label><input id="p2-name" value="${s.people.p2.name}"/></div>
+          <div class="field"><label>Starting weight (kg)</label><input type="number" id="p2-sw" value="${s.people.p2.startWeight}"/></div>
+          <div class="field"><label>Target weight (kg)</label><input type="number" id="p2-tw" value="${s.people.p2.targetWeight}"/></div>
+        </div>
+        <div class="inline-fields">
+          <div class="field"><label>Hourly rate (₹) — prices missed tasks</label><input type="number" id="p2-rate" value="${s.hourlyRate.p2}"/></div>
+          <div class="field"><label>Starting balance / stake (₹)</label><input type="number" id="p2-bal" value="${s.startingBalance.p2}"/></div>
+        </div>
+        <p class="section-sub" style="margin:6px 0 0;">Tracks: gym, badminton, diet+water, temple, night face routine, interview prep (feeds Code streak).</p>
+      </div>
+
+      <div class="card">
+        <h3>Challenge window</h3>
+        <div class="inline-fields">
+          <div class="field"><label>Start date</label><input type="date" id="start-date" value="${s.startISO}"/></div>
+          <div class="field"><label>Length (days)</label><input type="number" id="length-days" value="${s.lengthDays}"/></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>☁ Cloud Sync (optional — for two devices)</h3>
+        <p class="section-sub" style="margin:0 0 10px;">Without this, data lives only in this browser/device via Claude's artifact storage. Connect a free Firebase project + a shared room code so both of you see the same live duel from your own phones. <a href="#" id="fb-howto" style="color:var(--saffron-deep);">How do I get a config?</a></p>
+        <div id="fb-status-line" style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-bottom:8px;color:${fb.enabled?'var(--moss)':'var(--ink-faint)'};">${fb.enabled? "Connected — room '"+fb.roomCode+"' ("+fb.status+")" : "Not connected"}</div>
+        <div class="field"><label>Firebase config (paste the JSON object from your Firebase console)</label>
+          <textarea id="fb-config" style="min-height:70px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'></textarea></div>
+        <div class="field"><label>Room code (both people must enter the same code)</label><input id="fb-room" placeholder="e.g. rahul-priya-duel-1"/></div>
+        <button class="btn small" id="fb-connect-btn">Connect</button>
+        <span id="fb-connect-msg" style="font-size:11.5px;color:var(--maroon);margin-left:10px;"></span>
+        <div id="fb-howto-box" style="display:none;margin-top:12px;font-size:12px;color:var(--ink-soft);line-height:1.6;">
+          1. Go to <strong>console.firebase.google.com</strong> → Add project (free tier is enough).<br/>
+          2. In the project, open <strong>Build → Firestore Database</strong> → Create database (start in test mode, or use locked rules — see below).<br/>
+          3. Open <strong>Build → Authentication</strong> → Sign-in method → enable <strong>Anonymous</strong>.<br/>
+          4. Go to Project settings (gear icon) → scroll to "Your apps" → Add app → Web (&lt;/&gt;) → copy the <code>firebaseConfig</code> object shown → paste it above.<br/>
+          5. Recommended Firestore rule (Build → Firestore → Rules) so only signed-in app users can read/write:<br/>
+          <code style="display:block;background:var(--paper-alt);padding:8px;border-radius:4px;margin-top:4px;white-space:pre;">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /duelTrackers/{room} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}</code>
+        </div>
+      </div>
+
+
+      <div class="banner">
+        <strong>How the stakes work:</strong> each missed non-negotiable costs (task's typical minutes ÷ 60) × that person's hourly rate — priced as the value of the time actually wasted, not a flat fine. When someone misses, that amount moves from their balance to the other person's. Excused pauses, Recovery Mode, and N/A days never cost anything. This is a self-managed ledger between the two of you — no real money moves through this app; you settle up yourselves.
+      </div>
+
+      <button class="btn" id="lock-btn">🔒 Lock &amp; Start Challenge</button>
+      <span id="lock-error" style="color:var(--maroon);font-size:12px;margin-left:12px;"></span>
+    </div>
+  `;
+  document.getElementById("lock-btn").onclick = ()=>{
+    const p1n = document.getElementById("p1-name").value.trim();
+    const p2n = document.getElementById("p2-name").value.trim();
+    if(!p1n || !p2n){ document.getElementById("lock-error").textContent = "Both names are required before locking."; return; }
+    s.people.p1.name = p1n; s.people.p2.name = p2n;
+    s.people.p1.startWeight = Number(document.getElementById("p1-sw").value);
+    s.people.p1.targetWeight = Number(document.getElementById("p1-tw").value);
+    s.people.p2.startWeight = Number(document.getElementById("p2-sw").value);
+    s.people.p2.targetWeight = Number(document.getElementById("p2-tw").value);
+    s.hourlyRate.p1 = Number(document.getElementById("p1-rate").value)||0;
+    s.hourlyRate.p2 = Number(document.getElementById("p2-rate").value)||0;
+    s.startingBalance.p1 = Number(document.getElementById("p1-bal").value)||0;
+    s.startingBalance.p2 = Number(document.getElementById("p2-bal").value)||0;
+    s.startISO = document.getElementById("start-date").value || todayISO();
+    s.lengthDays = Number(document.getElementById("length-days").value)||100;
+    s.locked = true;
+    selectedISO = s.startISO;
+    persist(true);
+    render();
+  };
+  const howto = document.getElementById("fb-howto");
+  if(howto) howto.onclick = (ev)=>{ ev.preventDefault(); const box=document.getElementById("fb-howto-box"); box.style.display = box.style.display==="none"?"block":"none"; };
+  const fbBtn = document.getElementById("fb-connect-btn");
+  if(fbBtn) fbBtn.onclick = async ()=>{
+    const cfgStr = document.getElementById("fb-config").value.trim();
+    const room = document.getElementById("fb-room").value.trim();
+    const msg = document.getElementById("fb-connect-msg");
+    msg.style.color="var(--ink-soft)"; msg.textContent="Connecting…";
+    if(!cfgStr || !room){ msg.style.color="var(--maroon)"; msg.textContent="Paste a config and a room code first."; return; }
+    try{
+      JSON.parse(cfgStr);
+      await connectFirebase(cfgStr, room);
+      msg.style.color="var(--moss)"; msg.textContent="Connected ✓";
+      render();
+    }catch(e){
+      console.error(e);
+      msg.style.color="var(--maroon)"; msg.textContent="Couldn't connect — check the config JSON, and that Firestore + Anonymous Auth are enabled.";
+    }
+  };
+}
+function renderLockedSetupView(tab){
+  const s = state.setup;
+  tab.innerHTML = `
+    <h2 class="section-title">Setup (locked)</h2>
+    <p class="section-sub">${challengeOver()? "Challenge window has ended — you can reset now.":"Locked until the challenge's last day passes."}</p>
+    <div class="grid2v">
+      <div class="card"><h3 style="color:var(--p1);">${s.people.p1.name}</h3>
+        <div class="row"><span class="label">Weight</span><span class="val">${s.people.p1.startWeight}kg → ${s.people.p1.targetWeight}kg</span></div>
+        <div class="row"><span class="label">Rate</span><span class="val">₹${s.hourlyRate.p1}/hr</span></div>
+        <div class="row"><span class="label">Starting stake</span><span class="val">₹${s.startingBalance.p1}</span></div>
+      </div>
+      <div class="card"><h3 style="color:var(--p2);">${s.people.p2.name}</h3>
+        <div class="row"><span class="label">Weight</span><span class="val">${s.people.p2.startWeight}kg → ${s.people.p2.targetWeight}kg</span></div>
+        <div class="row"><span class="label">Rate</span><span class="val">₹${s.hourlyRate.p2}/hr</span></div>
+        <div class="row"><span class="label">Starting stake</span><span class="val">₹${s.startingBalance.p2}</span></div>
+      </div>
+    </div>
+    <div class="card"><div class="row"><span class="label">Window</span><span class="val">${prettyDate(s.startISO)} → ${prettyDate(endISO())} (${s.lengthDays} days)</span></div></div>
+
+    <div class="card">
+      <h3>☁ Cloud Sync — Firebase</h3>
+      <div id="fb-status-line2" style="font-family:'IBM Plex Mono',monospace;font-size:11px;margin-bottom:8px;color:${fb.enabled?'var(--moss)':'var(--ink-faint)'};">${fb.enabled? "Connected — room '"+fb.roomCode+"' ("+fb.status+")" : "Not connected — this device only"}</div>
+      ${fb.enabled? `<button class="btn small secondary" id="fb-disconnect-btn">Disconnect</button>` : `
+        <div class="field"><label>Firebase config (JSON)</label><textarea id="fb-config2" style="min-height:60px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;"></textarea></div>
+        <div class="field"><label>Room code (same on both devices)</label><input id="fb-room2"/></div>
+        <button class="btn small" id="fb-connect-btn2">Connect</button>
+        <span id="fb-connect-msg2" style="font-size:11.5px;color:var(--maroon);margin-left:10px;"></span>
+      `}
+    </div>
+
+    <button class="btn" id="reset-btn" ${challengeOver()?'':'disabled'}>Reset &amp; start a new challenge</button>
+  `;
+  const rb = document.getElementById("reset-btn");
+  if(challengeOver()){
+    rb.onclick = ()=>{ if(confirm("This wipes all logged data and starts a fresh setup. Continue?")){ state = defaultState(); persist(true); render(); } };
+  }
+  const dc = document.getElementById("fb-disconnect-btn");
+  if(dc) dc.onclick = async ()=>{ await clearFirebaseConfig(); render(); };
+  const cb2 = document.getElementById("fb-connect-btn2");
+  if(cb2) cb2.onclick = async ()=>{
+    const cfgStr = document.getElementById("fb-config2").value.trim();
+    const room = document.getElementById("fb-room2").value.trim();
+    const msg = document.getElementById("fb-connect-msg2");
+    if(!cfgStr || !room){ msg.style.color="var(--maroon)"; msg.textContent="Paste a config and a room code first."; return; }
+    try{ JSON.parse(cfgStr); await connectFirebase(cfgStr, room); render(); }
+    catch(e){ console.error(e); msg.style.color="var(--maroon)"; msg.textContent="Couldn't connect — check the config and Firestore/Auth setup."; }
+  };
+}
+
+/* ============ TODAY TAB ============ */
+function renderToday(tab, iso){
+  const person = activePerson;
+  const profileKey = state.setup.people[person].profile;
+  const cfg = PROFILE[profileKey];
+  const dow = isoToDate(iso).getDay();
+  const dIdx = dayIndexOf(iso, state.setup.startISO);
+  const e = getEntry(person, iso);
+  const name = state.setup.people[person].name;
+
+  const briefBlocks = [];
+  briefBlocks.push(`<div class="card"><h3>🏋️ Fitness</h3>
+    <div class="row"><span class="label">Gym</span><span class="val">${GYM[dow]}</span></div>
+    <div class="row"><span class="label">Badminton</span><span class="val">${BADMINTON[dow]?"10–11 PM":"— rest"}</span></div></div>`);
+  if(profileKey==="full"){
+    const wk = weekOf(dIdx);
+    const block2Label = codeBlock2Label(dow, dIdx);
+    briefBlocks.push(`<div class="card"><h3>💻 Code</h3>
+      <div class="row"><span class="label">Block 1 (DSA)</span><span class="val">60min, non-negotiable</span></div>
+      ${block2Label?`<div class="row"><span class="label">Block 2 (Wk ${wk})</span><span class="val">${state.meta.interviewScheduledP1?"⚑ low priority — interview prep":block2Label}</span></div>`:""}
+      ${dow===0?`<div class="row"><span class="label">Block 3</span><span class="val">${state.meta.interviewScheduledP1?"⚑ low priority":"Job search ops"}</span></div>`:""}
+      <details style="margin-top:8px;"><summary style="cursor:pointer;font-size:11.5px;color:var(--saffron-deep);">See full 13-week table</summary>
+        <div style="margin-top:8px;overflow-x:auto;">${fullCodeWeekTable(wk)}</div></details>
+      </div>`);
+    briefBlocks.push(`<div class="card"><h3>🙏 Spiritual · 🧹 Chores</h3>
+      <div class="row"><span class="label">Diya bati</span><span class="val">Every day</span></div>
+      <div class="row"><span class="label">Temple</span><span class="val">${TEMPLE[dow]?"Yes":"—"}</span></div>
+      <div class="row"><span class="label">Chores</span><span class="val">Daily${CHORE_EXTRA[dow]?" + "+CHORE_EXTRA[dow]:""}</span></div></div>`);
+    const b = BODY_FULL[dow];
+    briefBlocks.push(`<div class="card"><h3>🧴 Body care</h3>
+      <div class="row"><span class="label">Face</span><span class="val">${b.face}</span></div>
+      <div class="row"><span class="label">Body</span><span class="val">${b.body}</span></div>
+      <div class="row"><span class="label">Hair</span><span class="val">${b.hair}</span></div>
+      <details style="margin-top:8px;"><summary style="cursor:pointer;font-size:11.5px;color:var(--saffron-deep);">See full week table</summary>
+        <div style="margin-top:8px;overflow-x:auto;">${fullBodyWeekTable(dow)}</div></details></div>`);
+  } else {
+    briefBlocks.push(`<div class="card"><h3>💻 Interview Prep</h3>
+      <div class="row"><span class="label">Today</span><span class="val">Your call on content — feeds your Code streak</span></div></div>`);
+    briefBlocks.push(`<div class="card"><h3>🙏 Temple · 🧴 Night face</h3>
+      <div class="row"><span class="label">Temple</span><span class="val">${TEMPLE[dow]?"Yes":"—"}</span></div>
+      <div class="row"><span class="label">Night face routine</span><span class="val">${NIGHT_FACE[dow]}</span></div>
+      <details style="margin-top:8px;"><summary style="cursor:pointer;font-size:11.5px;color:var(--saffron-deep);">See full week table</summary>
+        <div style="margin-top:8px;overflow-x:auto;">${fullNightFaceTable(dow)}</div></details></div>`);
+  }
+  briefBlocks.push(`<div class="card"><h3>🍽️ Diet · 💧 Water</h3>
+    <div class="row"><span class="label">Target</span><span class="val">Own cal/protein goal, no sugar/packet/maida</span></div>
+    <div class="row"><span class="label">Water (small habit)</span><span class="val">3L</span></div></div>`);
+
+  tab.innerHTML = `
+    <div class="grid2">
+      <div>
+        <h2 class="section-title">${name}'s Brief</h2>
+        <p class="section-sub">${weekdayName(iso)} · ${cfg.codeLabel} feeds the Code streak.</p>
+        ${briefBlocks.join("")}
+      </div>
+      <div>
+        <h2 class="section-title">Evening Check-In</h2>
+        <div class="card"><h3>Gym</h3><div id="gym-status"></div>
+          <label style="display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:var(--ink-soft);"><input type="checkbox" id="gym-home" ${e.gymHome?'checked':''}/> Home workout fallback</label></div>
+        ${BADMINTON[dow]?`<div class="card"><h3>Badminton</h3><div id="badm-status"></div>
+          <div class="field" style="margin-top:8px;"><label>Steps fallback (if used)</label><input type="number" id="badm-steps" value="${e.badmintonSteps}"/></div></div>`:""}
+        <div class="card"><h3>${cfg.codeLabel}</h3><div id="code-status"></div></div>
+        ${profileKey==="full"?`<div class="card"><h3>Code Block 2</h3><div id="code2-status"></div></div>`:""}
+        ${profileKey==="full"&&dow===0?`<div class="card"><h3>Code Block 3</h3><div id="code3-status"></div></div>`:""}
+        <div class="card"><h3>Diet</h3><div class="field"><label>Logged?</label><div id="diet-status"></div></div>
+          <div class="inline-fields"><div class="field"><label>Calories</label><input type="number" id="cal" value="${e.calories}"/></div><div class="field"><label>Protein (g)</label><input type="number" id="prot" value="${e.protein}"/></div></div>
+          <div class="field"><label>💧 Water (L) — small habit, target 3L, not scored</label><input type="number" step="0.1" id="water" value="${e.waterL}"/>
+            <div id="water-pct" style="font-size:11px;color:var(--ink-faint);margin-top:3px;">${e.waterL!==""&&e.waterL!=null? Math.round(Math.min(100,(Number(e.waterL)/3)*100))+"% of 3L target" : "not logged yet"}</div></div>
+          <div style="display:flex;gap:12px;font-size:12px;color:var(--ink-soft);"><label><input type="checkbox" id="sugar" ${e.sugarFree?'checked':''}/> No sugar</label><label><input type="checkbox" id="packet" ${e.packetFree?'checked':''}/> No packet</label><label><input type="checkbox" id="maida" ${e.maidaFree?'checked':''}/> No maida</label></div></div>
+        ${profileKey==="full"?`<div class="card"><h3>Diya bati</h3><div id="diya-status"></div></div>`:""}
+        ${TEMPLE[dow]?`<div class="card"><h3>Temple</h3><div id="temple-status"></div></div>`:""}
+        ${profileKey==="full"?`<div class="card"><h3>Chores · Body care</h3>
+          <div class="field"><label>🧹 Chores</label><div id="chores-status"></div></div>
+          <div class="field" style="margin-top:10px;"><label>🧴 Body care</label><div id="bodycare-status"></div></div></div>`:""}
+        ${profileKey==="fitnessPlus"?`<div class="card"><h3>Night face routine</h3><div id="nightface-status"></div></div>`:""}
+        <div class="card"><h3>Sleep · Weight</h3>
+          <div class="inline-fields"><div class="field"><label>Sleep (hrs)</label><input type="number" step="0.1" id="sleep" value="${e.sleepHrs}"/></div><div class="field"><label>Weight (kg)</label><input type="number" step="0.1" id="wt" value="${e.weightKg}"/></div></div></div>
+        <div class="card"><h3>🏆 Win · ⚠️ Trap</h3>
+          <div class="field"><label>Biggest win</label><textarea id="win">${e.win}</textarea></div>
+          <div class="field"><label>Tomorrow's trap</label><textarea id="trap">${e.trap}</textarea></div>
+          <div class="field"><label>Notes</label><textarea id="notes">${e.notes}</textarea></div></div>
+        <div class="card" id="score-card"></div>
+      </div>
+    </div>
+  `;
+
+  fmtStatusButtons(document.getElementById("gym-status"),"gym",[["done","Done"],["excused","Excused"],["missed","Missed"],["recovery","Recovery"]], e);
+  if(BADMINTON[dow]) fmtStatusButtons(document.getElementById("badm-status"),"badminton",[["done","Done"],["excused","Excused"],["missed","Missed"]], e);
+  fmtStatusButtons(document.getElementById("code-status"), cfg.codeField, [["done","Done"],["recovery","Recovery"],["missed","Missed"]], e);
+  if(profileKey==="full"){
+    fmtStatusButtons(document.getElementById("code2-status"),"codeBlock2",[["done","Done"],["partial","Partial"],["missed","Missed"],["na","N/A"]], e);
+    if(dow===0) fmtStatusButtons(document.getElementById("code3-status"),"codeBlock3",[["done","Done"],["partial","Partial"],["missed","Missed"]], e);
+    fmtStatusButtons(document.getElementById("diya-status"),"diyaBati",[["done","Done"],["missed","Missed"]], e);
+    fmtStatusButtons(document.getElementById("chores-status"),"chores",[["done","Done"],["excused","Excused"],["missed","Missed"]], e);
+    fmtStatusButtons(document.getElementById("bodycare-status"),"bodyCare",[["done","Done"],["excused","Excused"],["missed","Missed"]], e);
+  } else {
+    fmtStatusButtons(document.getElementById("nightface-status"),"nightFace",[["done","Done"],["excused","Excused"],["missed","Missed"]], e);
+  }
+  fmtStatusButtons(document.getElementById("diet-status"),"dietLogged",[["yes","Yes"],["no","No"]], e);
+  if(TEMPLE[dow]) fmtStatusButtons(document.getElementById("temple-status"),"temple",[["done","Done"],["excused","Excused"],["missed","Missed"]], e);
+
+  const bind=(id,field,checkbox)=>{ const el=document.getElementById(id); if(!el) return;
+    el.addEventListener("change",()=>{ e[field]=checkbox?el.checked:el.value; persist(true); renderScoreCard(person,e,iso); }); };
+  bind("gym-home","gymHome",true); bind("badm-steps","badmintonSteps");
+  bind("cal","calories"); bind("prot","protein"); bind("water","waterL");
+  const waterEl = document.getElementById("water");
+  if(waterEl) waterEl.addEventListener("input",()=>{
+    const pctEl = document.getElementById("water-pct");
+    const v = waterEl.value;
+    pctEl.textContent = v!==""? Math.round(Math.min(100,(Number(v)/3)*100))+"% of 3L target" : "not logged yet";
+  });
+  bind("sugar","sugarFree",true); bind("packet","packetFree",true); bind("maida","maidaFree",true);
+  bind("sleep","sleepHrs"); bind("wt","weightKg");
+  bind("win","win"); bind("trap","trap"); bind("notes","notes");
+
+  renderScoreCard(person, e, iso);
+}
+function renderScoreCard(person, e, iso){
+  const card = document.getElementById("score-card"); if(!card) return;
+  const pct = consistencyFor(person, iso);
+  const zero = isZeroDay(person, e);
+  card.innerHTML = `<h3>Today's Score</h3>
+    ${pct!==null? `<div class="row"><span class="label">Consistency %</span><span class="val">${pct}%</span></div>` : `<div class="empty">Log a few items to see today's score.</div>`}
+    ${zero? `<div class="row"><span class="label" style="color:var(--maroon);font-weight:600;">⚠ Zero Day</span><span class="val"></span></div>`:""}`;
+}
+
+/* ============ STREAKS TAB ============ */
+function renderStreaks(tab, iso){
+  const rows = ["p1","p2"].map(p=>{
+    const name = state.setup.people[p].name;
+    const profileKey = state.setup.people[p].profile;
+    const cfg = PROFILE[profileKey];
+    const gymS = computeStreak(p,"gym",iso), badmS = computeStreak(p,"badminton",iso), codeS = computeStreak(p,cfg.codeField,iso), nzd = noZeroDayStreak(p,iso);
+    return `<div class="card"><h3 style="color:var(--${p});">${name}</h3>
+      <div class="row"><span class="label">Gym streak</span><span class="val">${gymS}</span></div>
+      <div class="row"><span class="label">Badminton streak</span><span class="val">${badmS}</span></div>
+      <div class="row"><span class="label">${cfg.codeLabel} / Code streak</span><span class="val">${codeS}</span></div>
+      <div class="row"><span class="label">No-Zero-Day streak</span><span class="val">${nzd}</span></div>
+      <div class="row"><span class="label">Consistency today</span><span class="val">${consistencyFor(p,iso)??"—"}%</span></div>
+    </div>`;
+  }).join("");
+  tab.innerHTML = `<h2 class="section-title">Streaks</h2><p class="section-sub">As of ${prettyDate(iso)}.</p><div class="grid2v">${rows}</div>
+    <h3 style="font-family:'Fraunces',serif;margin:20px 0 10px;">💧 Small Habits — Water (never scored, just visibility)</h3>
+    <div class="grid2v" id="water-summary"></div>
+    <h3 style="font-family:'Fraunces',serif;margin:20px 0 10px;">Last 14 days</h3>
+    <div class="grid2v"><div id="heat-p1"></div><div id="heat-p2"></div></div>`;
+  renderHeatmap(document.getElementById("heat-p1"),"p1",iso);
+  renderHeatmap(document.getElementById("heat-p2"),"p2",iso);
+  renderWaterSummary(document.getElementById("water-summary"), iso);
+}
+function renderWaterSummary(container, iso){
+  const upto = dayIndexOf(iso, state.setup.startISO);
+  const start = Math.max(1, upto-6);
+  let html = "";
+  ["p1","p2"].forEach(p=>{
+    const name = state.setup.people[p].name;
+    let vals = [];
+    for(let n=start;n<=upto;n++){
+      const d = isoOfDayIndex(n, state.setup.startISO);
+      const e2 = state.entries[p][d];
+      vals.push({d, v: e2 && e2.waterL!=="" && e2.waterL!=null ? Number(e2.waterL) : null});
+    }
+    const logged = vals.filter(x=>x.v!==null);
+    const avg = logged.length ? (logged.reduce((s,x)=>s+x.v,0)/logged.length).toFixed(1) : "—";
+    const todayVal = vals[vals.length-1].v;
+    html += `<div class="card"><h3 style="color:var(--${p});">${name}</h3>
+      <div class="row"><span class="label">Today</span><span class="val">${todayVal!==null? todayVal+"L / 3L" : "not logged"}</span></div>
+      <div class="row"><span class="label">7-day average</span><span class="val">${avg}${avg!=="—"?"L":""}</span></div>
+      <div style="display:flex;gap:4px;margin-top:8px;height:44px;align-items:flex-end;">
+        ${vals.map(x=>`<div title="${prettyDate(x.d)}: ${x.v!==null?x.v+'L':'not logged'}" style="flex:1;height:${x.v!==null?Math.min(40,Math.max(4,x.v/3*40)):3}px;background:${x.v!==null?(x.v>=3?'var(--moss)':'#D9C68A'):'var(--rule-soft)'};border-radius:2px;"></div>`).join("")}
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+function renderHeatmap(container, person, iso){
+  const profileKey = state.setup.people[person].profile;
+  const cfg = PROFILE[profileKey];
+  const upto = dayIndexOf(iso, state.setup.startISO);
+  const start = Math.max(1, upto-13);
+  const domains = profileKey==="full" ?
+    [["gym","Gym"],["badminton","Badm"],["dsa","Code"],["diyaBati","Diya"],["chores","Chores"],["bodyCare","Body"]] :
+    [["gym","Gym"],["badminton","Badm"],["interviewPrep","Code"],["nightFace","Face"]];
+  let html = `<div style="font-family:'Fraunces',serif;font-size:13px;margin-bottom:6px;color:var(--${person});">${state.setup.people[person].name} <span style="font-size:10px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;">(click a day to edit it)</span></div>`;
+  domains.forEach(([field,label])=>{
+    let cells="";
+    for(let n=start;n<=upto;n++){
+      const dayIso = isoOfDayIndex(n, state.setup.startISO);
+      const e2 = state.entries[person][dayIso];
+      const v = e2 ? (e2[field]||"na") : "na";
+      cells += `<div class="heat-cell" data-s="${v}" data-iso="${dayIso}" data-person="${person}" title="Day ${n} — ${prettyDate(dayIso)}" style="cursor:pointer;"></div>`;
+    }
+    html += `<div class="heat-row"><div class="heat-label">${label}</div>${cells}</div>`;
+  });
+  container.innerHTML = html;
+  container.querySelectorAll(".heat-cell").forEach(cell=>{
+    cell.addEventListener("click",()=>{
+      selectedISO = cell.getAttribute("data-iso");
+      activePerson = cell.getAttribute("data-person");
+      activeTab = "today";
+      render();
+    });
+  });
+}
+
+/* ============ VERSUS TAB ============ */
+function renderVersus(tab, iso){
+  const {total, txns} = penaltyTotalsUpTo(iso);
+  const bal = balances(iso);
+  const n1 = state.setup.people.p1.name, n2 = state.setup.people.p2.name;
+  let dayWinsP1=0, dayWinsP2=0, ties=0, sumP1=0, sumP2=0, days=0;
+  const upto = dayIndexOf(iso, state.setup.startISO);
+  for(let n=1;n<=upto;n++){
+    const d = isoOfDayIndex(n, state.setup.startISO);
+    const c1 = consistencyFor("p1", d), c2 = consistencyFor("p2", d);
+    if(c1===null && c2===null) continue;
+    days++;
+    sumP1 += c1||0; sumP2 += c2||0;
+    if((c1||0)>(c2||0)) dayWinsP1++; else if((c2||0)>(c1||0)) dayWinsP2++; else ties++;
+  }
+  const avg1 = days? Math.round(sumP1/days):0, avg2 = days? Math.round(sumP2/days):0;
+
+  tab.innerHTML = `
+    <h2 class="section-title">Versus &amp; Stakes</h2>
+    <p class="section-sub">Loser's missed-task penalties transfer to the winner — this is a self-managed ledger, no real money moves through the app.</p>
+    <div class="grid2v">
+      <div class="card"><h3 style="color:var(--p1);">${n1}</h3>
+        <div class="big-balance" style="color:var(--p1);">₹${bal.p1}</div>
+        <div class="row"><span class="label">Total self-penalties paid</span><span class="val">₹${total.p1}</span></div>
+        <div class="row"><span class="label">Day wins</span><span class="val">${dayWinsP1}</span></div>
+        <div class="row"><span class="label">Avg consistency</span><span class="val">${avg1}%</span></div>
+      </div>
+      <div class="card"><h3 style="color:var(--p2);">${n2}</h3>
+        <div class="big-balance" style="color:var(--p2);">₹${bal.p2}</div>
+        <div class="row"><span class="label">Total self-penalties paid</span><span class="val">₹${total.p2}</span></div>
+        <div class="row"><span class="label">Day wins</span><span class="val">${dayWinsP2}</span></div>
+        <div class="row"><span class="label">Avg consistency</span><span class="val">${avg2}%</span></div>
+      </div>
+    </div>
+    <div class="card"><div class="row"><span class="label">Ties so far</span><span class="val">${ties}</span></div>
+      ${challengeOver()? `<div class="row"><span class="label" style="font-weight:700;">Overall winner</span><span class="val" style="font-weight:700;">${avg1>avg2?n1:(avg2>avg1?n2:(bal.p1>bal.p2?n1:(bal.p2>bal.p1?n2:"Tie")))}</span></div>`:""}
+    </div>
+    <h3 style="font-family:'Fraunces',serif;margin:20px 0 10px;">Recent transactions</h3>
+    <div class="card">
+      ${txns.slice(-15).reverse().map(t=>`<div class="ledger-row"><span>${prettyDate(t.iso)} — ${state.setup.people[t.person].name} missed ${t.field}</span><span style="color:var(--maroon);">-₹${t.cost} → ${t.person==='p1'?n2:n1}</span></div>`).join("") || `<div class="empty">No missed tasks logged yet — clean ledger.</div>`}
+    </div>
+  `;
+}
+
+/* ============ LOG TAB (DSA / interview prep entries) ============ */
+function renderLog(tab, iso){
+  const person = activePerson;
+  const profileKey = state.setup.people[person].profile;
+  const label = profileKey==="full" ? "Problem" : "Topic";
+  const log = state.dsaLog[person];
+  tab.innerHTML = `
+    <h2 class="section-title">${state.setup.people[person].name}'s Log</h2>
+    <div class="card"><h3>Add entry</h3>
+      <div class="inline-fields"><div class="field"><label>${label}</label><input id="l-name"/></div><div class="field"><label>Category/Topic area</label><input id="l-cat"/></div></div>
+      <div class="inline-fields"><div class="field"><label>Time (min)</label><input type="number" id="l-time"/></div><div class="field"><label>Confidence 1–5</label><input type="number" min="1" max="5" id="l-conf"/></div></div>
+      <button class="btn small" id="add-log">Add</button>
+    </div>
+    <div class="card"><h3>Log (${log.length})</h3><div style="overflow-x:auto;"><table class="log">
+      <thead><tr><th>Date</th><th>${label}</th><th>Category</th><th>Time</th><th>Conf</th></tr></thead>
+      <tbody>${log.slice().reverse().map(p=>`<tr><td>${prettyDate(p.date)}</td><td>${p.name}</td><td>${p.category}</td><td>${p.time}m</td><td>${p.confidence}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">No entries yet.</td></tr>`}</tbody>
+    </table></div></div>
+  `;
+  document.getElementById("add-log").onclick = ()=>{
+    const name = document.getElementById("l-name").value.trim(); if(!name) return;
+    log.push({ date: iso, name, category: document.getElementById("l-cat").value.trim(), time: Number(document.getElementById("l-time").value)||0, confidence: Number(document.getElementById("l-conf").value)||"" });
+    persist(true); renderLog(tab, iso);
+  };
+}
+
+/* ============ WEIGHT TAB ============ */
+function renderWeight(tab, iso){
+  tab.innerHTML = `<h2 class="section-title">Weight Trend</h2><div class="grid2v"><div id="w-p1"></div><div id="w-p2"></div></div>`;
+  ["p1","p2"].forEach(p=>{
+    const person = state.setup.people[p];
+    const logs = Object.values(state.entries[p]).filter(x=>x.weightKg!=="" && x.weightKg!=null).map(x=>({iso:x.iso, kg:Number(x.weightKg)})).sort((a,b)=>a.iso.localeCompare(b.iso));
+    const el = document.getElementById("w-"+p);
+    el.innerHTML = `<div class="card"><h3 style="color:var(--${p});">${person.name} — ${person.startWeight}kg → ${person.targetWeight}kg</h3><div id="chart-${p}"></div>
+      <div class="row"><span class="label">Latest</span><span class="val">${logs.length? logs[logs.length-1].kg+"kg" : "—"}</span></div></div>`;
+    renderChart(document.getElementById("chart-"+p), logs, person.startWeight, person.targetWeight);
+  });
+}
+function renderChart(container, logs, startW, targetW){
+  const W=440,H=190,PAD=30;
+  const len = state.setup.lengthDays;
+  const xFor = (dIdx)=> PAD + (dIdx-1)/(len-1)*(W-2*PAD);
+  const yMin = Math.min(startW,targetW)-3, yMax = Math.max(startW,targetW)+3;
+  const yFor = (kg)=> H-PAD - (kg-yMin)/(yMax-yMin)*(H-2*PAD);
+  let pts = logs.map(l=>`${xFor(dayIndexOf(l.iso, state.setup.startISO))},${yFor(l.kg)}`).join(" ");
+  const targetY = yFor(targetW), baseY = yFor(startW);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;">
+    <line x1="${PAD}" y1="${targetY}" x2="${W-PAD}" y2="${targetY}" stroke="#4C7A52" stroke-dasharray="4,4"/>
+    <text x="${W-PAD}" y="${targetY-4}" text-anchor="end" font-size="9" fill="#4C7A52" font-family="IBM Plex Mono, monospace">target ${targetW}kg</text>
+    <line x1="${PAD}" y1="${baseY}" x2="${W-PAD}" y2="${baseY}" stroke="#9B9080" stroke-dasharray="2,3"/>
+    <text x="${PAD}" y="${baseY-4}" font-size="9" fill="#9B9080" font-family="IBM Plex Mono, monospace">start ${startW}kg</text>
+    ${pts? `<polyline points="${pts}" fill="none" stroke="#23201B" stroke-width="2"/>`:""}
+    ${logs.map(l=>`<circle cx="${xFor(dayIndexOf(l.iso, state.setup.startISO))}" cy="${yFor(l.kg)}" r="3" fill="#E8961C"/>`).join("")}
+  </svg>`;
+  container.innerHTML = logs.length? svg : `<div class="empty">No weight entries yet.</div>`;
+}
+
+/* ============ REVIEW TAB ============ */
+function renderReview(tab, iso){
+  const dow = isoToDate(iso).getDay();
+  const dIdx = dayIndexOf(iso, state.setup.startISO);
+  const start = Math.max(1, dIdx-6);
+  function weekAvg(p){
+    let sum=0,count=0;
+    for(let n=start;n<=dIdx;n++){ const c=consistencyFor(p, isoOfDayIndex(n, state.setup.startISO)); if(c!==null){sum+=c;count++;} }
+    return count? Math.round(sum/count):null;
+  }
+  tab.innerHTML = `
+    <h2 class="section-title">Weekly Review</h2>
+    <p class="section-sub">Trailing 7 days ending ${prettyDate(iso)}. ${dow===0?"":"(Full review runs on Sundays — this is a live preview.)"}</p>
+    <div class="grid2v">
+      <div class="card"><h3 style="color:var(--p1);">${state.setup.people.p1.name}</h3><div class="row"><span class="label">Weekly consistency</span><span class="val">${weekAvg("p1")??"—"}%</span></div></div>
+      <div class="card"><h3 style="color:var(--p2);">${state.setup.people.p2.name}</h3><div class="row"><span class="label">Weekly consistency</span><span class="val">${weekAvg("p2")??"—"}%</span></div></div>
+    </div>
+    <div class="card"><h3>Notes for this week</h3><div class="field"><textarea id="scratch" style="min-height:80px;">${state.meta.scratch[iso]||""}</textarea></div></div>
+  `;
+  document.getElementById("scratch").addEventListener("change",(ev)=>{ state.meta.scratch[iso]=ev.target.value; persist(true); });
+}
+
+init();
+})();
+</script>
+</body>
+</html>
